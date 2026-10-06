@@ -178,60 +178,84 @@ function formatPair(list) {
     return valid.length > 0 ? valid.join(" - ") : "---";
 }
 
-function parseWorkbookRows(rows) {
+// Bóc tách ngày tháng chuẩn xác tuyệt đối từ dữ liệu Google Sheets
+function parseCellDate(cell) {
+    if (!cell) return "";
+    // Trường hợp 1: Google Sheets trả về Date object trong cell.v: "Date(2026, 9, 7)"
+    const rawVal = String(cell.v || "");
+    const dateMatch = rawVal.match(/Date\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (dateMatch) {
+        const y = dateMatch[1];
+        const m = String(Number(dateMatch[2]) + 1).padStart(2, '0');
+        const d = String(dateMatch[3]).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    // Trường hợp 2: Dạng chuỗi hiển thị cell.f hoặc cell.v (ví dụ: "7/10/2026" hoặc "07/10/2026")
+    const str = String(cell.f || cell.v || "").trim();
+    if (str.includes('/')) {
+        const p = str.split('/');
+        if (p.length === 3) {
+            const y = (p[2].length === 2) ? "20" + p[2] : p[2];
+            // Định dạng ngày trong Excel Việt Nam luôn là Ngày/Tháng/Năm (D/M/YYYY)
+            const d = String(p[0]).padStart(2, '0');
+            const m = String(p[1]).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+    } else if (str.includes('-')) {
+        return str.substring(0, 10);
+    }
+    return "";
+}
+
+function parseWorkbookGvizRows(rows) {
     const rawShifts = [];
     let lastDateStr = "";
 
     for (let r = 0; r < rows.length; r++) {
         const row = rows[r];
-        const caVal = row[1];
+        if (!row || !row.c) continue;
+
+        const caCell = row.c[1];
+        const caVal = caCell ? (caCell.v || "") : "";
         if (caVal === "" || isNaN(Number(caVal))) continue;
         const caNum = Number(caVal);
         if (![1, 2, 3].includes(caNum)) continue;
 
-        let dateVal = row[0];
-        if (dateVal !== "") {
-            let s = String(dateVal).trim().replace(/\/+/g, '/');
-            if (s.includes('/')) {
-                const p = s.split('/');
-                if (p.length === 3) {
-                    const y = (p[2].length === 2) ? "20" + p[2] : p[2];
-                    if (Number(p[0]) > 12) {
-                        lastDateStr = `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-                    } else if (Number(p[1]) > 12) {
-                        lastDateStr = `${y}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
-                    } else {
-                        lastDateStr = `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-                    }
-                }
-            } else if (s.includes('-')) {
-                lastDateStr = s.substring(0, 10);
-            }
+        const dateCell = row.c[0];
+        const parsedDate = parseCellDate(dateCell);
+        if (parsedDate) {
+            lastDateStr = parsedDate;
         }
 
         if (!lastDateStr) continue;
 
-        const dieuHanhStr = String(row[2] || row[3] || "").replace(/\n/g, ' ').trim();
-        const phoCaStr = [row[4], row[5]].filter(x => x && String(x).trim() !== "").join(" | ");
-        const phuongThucStr = String(row[6] || "").trim();
+        function getCellText(idx) {
+            const c = row.c[idx];
+            return c ? String(c.f || c.v || "").trim() : "";
+        }
 
-        const lx_tdm = String(row[12] || "");
-        const tdm1 = formatPair([formatWorker(row[7], lx_tdm), formatWorker(row[8], lx_tdm)]);
-        const tdm2 = formatPair([formatWorker(row[9], lx_tdm), formatWorker(row[10], lx_tdm), formatWorker(row[11], lx_tdm)]);
+        const dieuHanhStr = (getCellText(2) || getCellText(3)).replace(/\n/g, ' ').trim();
+        const phoCaStr = [getCellText(4), getCellText(5)].filter(x => x && x !== "").join(" | ");
+        const phuongThucStr = getCellText(6);
 
-        const lx_tt = String(row[18] || "");
-        const tt1 = formatPair([formatWorker(row[13], lx_tt), formatWorker(row[14], lx_tt)]);
-        const tt2 = formatPair([formatWorker(row[15], lx_tt), formatWorker(row[16], lx_tt), formatWorker(row[17], lx_tt)]);
+        const lx_tdm = getCellText(12);
+        const tdm1 = formatPair([formatWorker(getCellText(7), lx_tdm), formatWorker(getCellText(8), lx_tdm)]);
+        const tdm2 = formatPair([formatWorker(getCellText(9), lx_tdm), formatWorker(getCellText(10), lx_tdm), formatWorker(getCellText(11), lx_tdm)]);
 
-        const lx_tu = String(row[24] || "");
-        const tu1 = formatPair([formatWorker(row[19], lx_tu), formatWorker(row[20], lx_tu)]);
-        const tu2 = formatPair([formatWorker(row[21], lx_tu), formatWorker(row[22], lx_tu), formatWorker(row[23], lx_tu)]);
+        const lx_tt = getCellText(18);
+        const tt1 = formatPair([formatWorker(getCellText(13), lx_tt), formatWorker(getCellText(14), lx_tt)]);
+        const tt2 = formatPair([formatWorker(getCellText(15), lx_tt), formatWorker(getCellText(16), lx_tt), formatWorker(getCellText(17), lx_tt)]);
+
+        const lx_tu = getCellText(24);
+        const tu1 = formatPair([formatWorker(getCellText(19), lx_tu), formatWorker(getCellText(20), lx_tu)]);
+        const tu2 = formatPair([formatWorker(getCellText(21), lx_tu), formatWorker(getCellText(22), lx_tu), formatWorker(getCellText(23), lx_tu)]);
 
         rawShifts.push({
             ngay: lastDateStr,
             origCa: caNum,
             ca: caNum,
-            to: String(row[25] || "").trim() || `Tổ VHLĐ`,
+            to: getCellText(25) || `Tổ VHLĐ`,
             dieu_hanh: dieuHanhStr,
             pho_ca: phoCaStr || "---",
             phuong_thuc: phuongThucStr || "---",
@@ -247,7 +271,6 @@ function parseWorkbookRows(rows) {
     return standardizeSchedule(rawShifts);
 }
 
-// Tải dữ liệu qua cơ chế JSONP (không bao giờ bị trình duyệt chặn CORS)
 function fetchSheetViaJsonp(sheetName) {
     return new Promise((resolve) => {
         const callbackName = 'gvizCallback_' + Math.floor(Math.random() * 1000000);
@@ -269,18 +292,7 @@ function fetchSheetViaJsonp(sheetName) {
                 return;
             }
 
-            const rows = [];
-            json.table.rows.forEach(r => {
-                const row = [];
-                if (r.c) {
-                    r.c.forEach(cell => {
-                        row.push(cell ? (cell.f || cell.v || "") : "");
-                    });
-                }
-                rows.push(row);
-            });
-
-            resolve(parseWorkbookRows(rows));
+            resolve(parseWorkbookGvizRows(json.table.rows));
         };
 
         script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=responseHandler:${callbackName}&t=${Date.now()}`;
