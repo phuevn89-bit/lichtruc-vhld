@@ -81,12 +81,13 @@
 </div>
 
 <script>
+// ID BẢNG TÍNH & ID XUẤT BẢN CÔNG KHAI KHÔNG BỊ CHẶN CORS
 const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
+const PUB_ID = "2PACX-1vSDGkeaUw8adoQf1_MlQ9RkYnV2_F6FqgwDGW6jZzvsylE1FWGD3BIUGp7vmiMsLySomK0U4cc323b6";
 const SHEET_NAMES = [
-    "Thang_09", "Thang_10", "Thang_11", "Thang_12", 
+    "Thang_10", "Thang_09", "Thang_11", "Thang_12", 
     "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
-    "Thang_05", "Thang_06", "Thang_07", "Thang_08", 
-    "Lich_truc", "Lich_truc (2)", "Trang tính 1"
+    "Thang_05", "Thang_06", "Thang_07", "Thang_08", "Lich_truc"
 ];
 
 let SCHEDULE_DATA = [];
@@ -198,8 +199,11 @@ function parseWorkbookRows(rows) {
                 const p = s.split('/');
                 if (p.length === 3) {
                     const y = (p[2].length === 2) ? "20" + p[2] : p[2];
-                    lastDateStr = `${y}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
                     if (Number(p[0]) > 12) {
+                        lastDateStr = `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                    } else if (Number(p[1]) > 12) {
+                        lastDateStr = `${y}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+                    } else {
                         lastDateStr = `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
                     }
                 }
@@ -246,26 +250,67 @@ function parseWorkbookRows(rows) {
     return standardizeSchedule(rawShifts);
 }
 
-async function fetchSheetData(sheetName) {
-    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
-    try {
-        const res = await fetch(url);
-        if (!res.ok) return [];
-        const csv = await res.text();
-        const wb = XLSX.read(csv, { type: 'string' });
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
-        return parseWorkbookRows(rows);
-    } catch(e) {
-        return [];
-    }
+// Hàm tải dữ liệu qua kỹ thuật JSONP (không bao giờ bị lỗi CORS chặn)
+function fetchSheetViaJsonp(sheetName) {
+    return new Promise((resolve) => {
+        const callbackName = 'gvizCallback_' + Math.floor(Math.random() * 1000000);
+        const script = document.createElement('script');
+        
+        const timeout = setTimeout(() => {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            resolve([]);
+        }, 6000);
+
+        window[callbackName] = function(json) {
+            clearTimeout(timeout);
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            
+            if (!json || !json.table || !json.table.rows) {
+                resolve([]);
+                return;
+            }
+
+            const rows = [];
+            json.table.rows.forEach(r => {
+                const row = [];
+                if (r.c) {
+                    r.c.forEach(cell => {
+                        row.push(cell ? (cell.f || cell.v || "") : "");
+                    });
+                }
+                rows.push(row);
+            });
+
+            resolve(parseWorkbookRows(rows));
+        };
+
+        script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=responseHandler:${callbackName}&t=${Date.now()}`;
+        script.onerror = function() {
+            clearTimeout(timeout);
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            resolve([]);
+        };
+        document.body.appendChild(script);
+    });
 }
 
 async function syncAllMonths(forceAlert = false) {
-    updateStatusDisplay("Đang đồng bộ dữ liệu các tháng từ Google Sheets...", true);
+    updateStatusDisplay("Đang đồng bộ dữ liệu từ Google Sheets...", true);
     
     let allShifts = [];
     for (const name of SHEET_NAMES) {
-        const list = await fetchSheetData(name);
+        const list = await fetchSheetViaJsonp(name);
+        if (list && list.length > 0) {
+            allShifts = allShifts.concat(list);
+        }
+    }
+
+    // Nếu tải theo tên sheet chưa có, thử tải toàn bộ bảng tính mặc định
+    if (allShifts.length === 0) {
+        const list = await fetchSheetViaJsonp("");
         if (list && list.length > 0) {
             allShifts = allShifts.concat(list);
         }
