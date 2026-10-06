@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kíp Trực Đội VHLĐ</title>
-    <!-- Thư viện SheetJS đọc dữ liệu -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
@@ -81,9 +80,7 @@
 </div>
 
 <script>
-// ID BẢNG TÍNH & ID XUẤT BẢN CÔNG KHAI KHÔNG BỊ CHẶN CORS
 const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
-const PUB_ID = "2PACX-1vSDGkeaUw8adoQf1_MlQ9RkYnV2_F6FqgwDGW6jZzvsylE1FWGD3BIUGp7vmiMsLySomK0U4cc323b6";
 const SHEET_NAMES = [
     "Thang_10", "Thang_09", "Thang_11", "Thang_12", 
     "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
@@ -250,7 +247,7 @@ function parseWorkbookRows(rows) {
     return standardizeSchedule(rawShifts);
 }
 
-// Hàm tải dữ liệu qua kỹ thuật JSONP (không bao giờ bị lỗi CORS chặn)
+// Tải dữ liệu qua cơ chế JSONP (không bao giờ bị trình duyệt chặn CORS)
 function fetchSheetViaJsonp(sheetName) {
     return new Promise((resolve) => {
         const callbackName = 'gvizCallback_' + Math.floor(Math.random() * 1000000);
@@ -308,7 +305,6 @@ async function syncAllMonths(forceAlert = false) {
         }
     }
 
-    // Nếu tải theo tên sheet chưa có, thử tải toàn bộ bảng tính mặc định
     if (allShifts.length === 0) {
         const list = await fetchSheetViaJsonp("");
         if (list && list.length > 0) {
