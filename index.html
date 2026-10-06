@@ -1,6 +1,7 @@
+# Tạo file index.html chuẩn sạch 100% không dính 1 chữ python nào
 sheet_id = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4"
 
-html_code = f"""<!DOCTYPE html>
+raw_html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -9,45 +10,45 @@ html_code = f"""<!DOCTYPE html>
     <!-- Thư viện SheetJS đọc dữ liệu -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        * {{ box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }}
-        body {{ background: #f0f2f5; margin: 0; padding: 12px; }}
-        .app-container {{ max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }}
-        .header-title {{ text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }}
-        .btn-group {{ display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }}
-        .btn {{ width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }}
-        .btn-now {{ background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }}
-        .btn-today {{ background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }}
-        .btn-tomorrow {{ background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }}
-        .separator {{ text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }}
-        .separator::before, .separator::after {{ content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }}
-        .separator::before {{ left: 0; }}
-        .separator::after {{ right: 0; }}
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding: 12px; }
+        .app-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .header-title { text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-now { background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }
+        .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }
+        .btn-tomorrow { background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }
+        .separator { text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }
+        .separator::before, .separator::after { content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }
+        .separator::before { left: 0; }
+        .separator::after { right: 0; }
         
-        .search-box {{ display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }}
-        .search-box input[type="date"] {{ flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }}
-        .btn-step {{ flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }}
-        .btn-step:hover {{ background: #343a40; }}
-        .btn-step-next {{ background: #0b5394; }}
-        .btn-step-next:hover {{ background: #083c6c; }}
+        .search-box { display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }
+        .search-box input[type="date"] { flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }
+        .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
+        .btn-step:hover { background: #343a40; }
+        .btn-step-next { background: #0b5394; }
+        .btn-step-next:hover { background: #083c6c; }
 
-        .card-shift {{ background: #fff; border: 1px solid #ced4da; border-left: 5px solid #0b5394; border-radius: 8px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }}
-        .card-shift-header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px; }}
-        .shift-name {{ font-weight: bold; font-size: 1.05rem; color: #0b5394; }}
-        .shift-badge {{ background: #fd7e14; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }}
-        .row-info {{ margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }}
+        .card-shift { background: #fff; border: 1px solid #ced4da; border-left: 5px solid #0b5394; border-radius: 8px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-shift-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px; }
+        .shift-name { font-weight: bold; font-size: 1.05rem; color: #0b5394; }
+        .shift-badge { background: #fd7e14; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .row-info { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }
         
-        .area-block {{ background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }}
-        .area-title {{ font-weight: 700; color: #0b5394; font-size: 0.92rem; margin-bottom: 5px; }}
-        .pair-row {{ display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; }}
-        .pair-item {{ display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }}
-        .pair-label {{ font-weight: 600; color: #495057; min-width: 52px; }}
-        .pair-val {{ color: #212529; }}
+        .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
+        .area-title { font-weight: 700; color: #0b5394; font-size: 0.92rem; margin-bottom: 5px; }
+        .pair-row { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; }
+        .pair-item { display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+        .pair-label { font-weight: 600; color: #495057; min-width: 52px; }
+        .pair-val { color: #212529; }
         
-        .sync-box {{ margin-top: 25px; padding-top: 15px; border-top: 1px dashed #dee2e6; text-align: center; font-size: 0.85rem; }}
-        .btn-sync {{ background: #0d6efd; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }}
-        .btn-sync:hover {{ background: #0b5ed7; }}
-        .status-msg {{ margin-top: 8px; font-weight: 600; }}
-        .footer-note {{ text-align: center; font-size: 0.78rem; color: #6c757d; margin-top: 15px; line-height: 1.4; }}
+        .sync-box { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #dee2e6; text-align: center; font-size: 0.85rem; }
+        .btn-sync { background: #0d6efd; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-sync:hover { background: #0b5ed7; }
+        .status-msg { margin-top: 8px; font-weight: 600; }
+        .footer-note { text-align: center; font-size: 0.78rem; color: #6c757d; margin-top: 15px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -77,37 +78,31 @@ html_code = f"""<!DOCTYPE html>
     </div>
 
     <div class="sync-box">
-        <button type="button" class="btn-sync" onclick="syncAllMonths(true)">🔄 Cập nhật lịch mới từ Google Sheets</button>
+        <button type="button" class="btn-sync" onclick="syncAllMonths(true)">🔄 Cập nhật toàn bộ lịch từ Google Sheets</button>
         <div id="syncStatus" class="status-msg"></div>
     </div>
 </div>
 
 <script>
 // ==========================================
-// CẤU HÌNH TỰ ĐỘNG ĐỌC TỪ GOOGLE SHEETS
+// CẤU HÌNH GOOGLE SHEETS
 // ==========================================
-const SPREADSHEET_ID = "{sheet_id}";
-
-// Hệ thống tự động quét tất cả các tab tháng có thể có (Thang_09, Thang_10, Thang_11...)
-const SHEET_NAMES = [
-    "Thang_09", "Thang_10", "Thang_11", "Thang_12", 
-    "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
-    "Thang_05", "Thang_06", "Thang_07", "Thang_08",
-    "Lich_truc"
-];
+const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
+// Danh sách các sheet tên tháng mà hệ thống sẽ tự động quét và gom chung
+const SHEET_NAMES = ["Thang_09", "Thang_10", "Thang_11", "Thang_12", "Thang_01", "Thang_02", "Thang_03", "Thang_04", "Thang_05", "Thang_06", "Thang_07", "Thang_08", "Lich_truc"];
 
 let SCHEDULE_DATA = [];
 
-function standardizeSchedule(list) {{
+function standardizeSchedule(list) {
     if (!list || list.length === 0) return [];
-    const grouped = {{}};
-    list.forEach(item => {{
+    const grouped = {};
+    list.forEach(item => {
         if (!grouped[item.ngay]) grouped[item.ngay] = [];
         grouped[item.ngay].push(item);
-    }});
+    });
 
     const result = [];
-    Object.keys(grouped).forEach(ngay => {{
+    Object.keys(grouped).forEach(ngay => {
         const shifts = grouped[ngay];
         const ca2 = shifts.find(x => (x.origCa === 2 || x.ca === 2));
         const hasCa2Content = ca2 && (
@@ -119,79 +114,79 @@ function standardizeSchedule(list) {{
 
         const isTwoShiftDay = !hasCa2Content;
 
-        if (isTwoShiftDay) {{
-            shifts.forEach(s => {{
+        if (isTwoShiftDay) {
+            shifts.forEach(s => {
                 const caIdx = s.origCa || s.ca;
-                if (caIdx === 1) {{
+                if (caIdx === 1) {
                     s.ca = 1;
                     s.gio = "06h00 - 18h00";
                     result.push(s);
-                }} else if (caIdx === 3 || caIdx === 2) {{
+                } else if (caIdx === 3 || caIdx === 2) {
                     s.ca = 2;
                     s.gio = "18h00 - 06h00";
                     result.push(s);
-                }}
-            }});
-        }} else {{
-            shifts.forEach(s => {{
+                }
+            });
+        } else {
+            shifts.forEach(s => {
                 const caIdx = s.origCa || s.ca;
                 s.ca = caIdx;
                 s.gio = (s.ca === 1) ? "06h00 - 14h00" : (s.ca === 2) ? "14h00 - 22h00" : "22h00 - 06h00";
                 result.push(s);
-            }});
-        }}
-    }});
+            });
+        }
+    });
 
-    return result.sort((a,b) => {{
+    return result.sort((a,b) => {
         if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
         return a.ca - b.ca;
-    }});
-}}
+    });
+}
 
-function formatDateStr(dStr) {{
+function formatDateStr(dStr) {
     if (!dStr) return "";
     const p = dStr.split('-');
-    return `${{p[2]}}/${{p[1]}}/${{p[0]}}`;
-}}
+    return `${p[2]}/${p[1]}/${p[0]}`;
+}
 
-function updateStatusDisplay(msg, isSuccess) {{
+function updateStatusDisplay(msg, isSuccess) {
     const statusEl = document.getElementById('syncStatus');
-    if (msg) {{
-        statusEl.innerHTML = `<span style="color:${{isSuccess ? '#198754' : '#dc3545'}}">${{msg}}</span>`;
+    if (msg) {
+        statusEl.innerHTML = `<span style="color:${isSuccess ? '#198754' : '#dc3545'}">${msg}</span>`;
         return;
-    }}
-    if (SCHEDULE_DATA.length > 0) {{
+    }
+    if (SCHEDULE_DATA.length > 0) {
         const dates = Array.from(new Set(SCHEDULE_DATA.map(x => x.ngay))).sort();
         const fromDate = formatDateStr(dates[0]);
         const toDate = formatDateStr(dates[dates.length - 1]);
-        statusEl.innerHTML = `<span style="color:#198754">✓ Đang dùng dữ liệu ${{SCHEDULE_DATA.length}} ca trực (${{fromDate}} ➔ ${{toDate}})</span>`;
-    }}
-}}
+        statusEl.innerHTML = `<span style="color:#198754">✓ Đã đồng bộ ${SCHEDULE_DATA.length} ca trực (${fromDate} ➔ ${toDate})</span>`;
+    }
+}
 
-function formatWorker(name, driverStr) {{
+function formatWorker(name, driverStr) {
     if (!name) return "";
     name = String(name).trim().replace(/\\n/g, ' ');
     if (!name) return "";
-    if (driverStr) {{
+    if (driverStr) {
         const cleanDrv = driverStr.toLowerCase();
         const shortName = name.replace(/\\(.*\\)/g, '').trim().toLowerCase();
-        if (shortName && cleanDrv.includes(shortName)) {{
+        if (shortName && cleanDrv.includes(shortName)) {
             return name + " 🚗";
-        }}
-    }}
+        }
+    }
     return name;
-}}
+}
 
-function formatPair(list) {{
+function formatPair(list) {
     const valid = list.filter(x => x && x.trim() !== "");
     return valid.length > 0 ? valid.join(" - ") : "---";
-}}
+}
 
-function parseWorkbookRows(rows) {{
+function parseWorkbookRows(rows) {
     const rawShifts = [];
     let lastDateStr = "";
 
-    for (let r = 0; r < rows.length; r++) {{
+    for (let r = 0; r < rows.length; r++) {
         const row = rows[r];
         const caVal = row[1];
         if (caVal === "" || isNaN(Number(caVal))) continue;
@@ -199,15 +194,15 @@ function parseWorkbookRows(rows) {{
         if (![1, 2, 3].includes(caNum)) continue;
 
         let dateVal = row[0];
-        if (dateVal !== "") {{
+        if (dateVal !== "") {
             let s = String(dateVal).trim().replace(/\\/+/g, '/');
-            if (s.includes('/')) {{
+            if (s.includes('/')) {
                 const p = s.split('/');
-                if (p.length === 3) lastDateStr = `${{p[2]}}-${{p[1].padStart(2,'0')}}-${{p[0].padStart(2,'0')}}`;
-            }} else if (s.includes('-')) {{
+                if (p.length === 3) lastDateStr = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else if (s.includes('-')) {
                 lastDateStr = s.substring(0, 10);
-            }}
-        }}
+            }
+        }
 
         if (!lastDateStr) continue;
 
@@ -227,7 +222,7 @@ function parseWorkbookRows(rows) {{
         const tu1 = formatPair([formatWorker(row[19], lx_tu), formatWorker(row[20], lx_tu)]);
         const tu2 = formatPair([formatWorker(row[21], lx_tu), formatWorker(row[22], lx_tu), formatWorker(row[23], lx_tu)]);
 
-        rawShifts.push({{
+        rawShifts.push({
             ngay: lastDateStr,
             origCa: caNum,
             ca: caNum,
@@ -241,63 +236,65 @@ function parseWorkbookRows(rows) {{
             tt2: tt2,
             tu1: tu1,
             tu2: tu2
-        }});
-    }}
+        });
+    }
 
     return standardizeSchedule(rawShifts);
-}}
+}
 
-async function fetchSheetData(sheetName) {{
-    const url = `https://docs.google.com/spreadsheets/d/${{SPREADSHEET_ID}}/gviz/tq?tqx=out:csv&sheet=${{encodeURIComponent(sheetName)}}&t=${{Date.now()}}`;
-    try {{
+async function fetchSheetData(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
+    try {
         const res = await fetch(url);
         if (!res.ok) return [];
         const csv = await res.text();
-        const wb = XLSX.read(csv, {{ type: 'string' }});
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {{ header: 1, defval: "" }});
+        const wb = XLSX.read(csv, { type: 'string' });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
         return parseWorkbookRows(rows);
-    }} catch(e) {{
+    } catch(e) {
         return [];
-    }}
-}}
+    }
+}
 
-async function syncAllMonths(forceAlert = false) {{
-    updateStatusDisplay("Đang đồng bộ dữ liệu từ Google Sheets...", true);
+async function syncAllMonths(forceAlert = false) {
+    updateStatusDisplay("Đang đồng bộ dữ liệu các tháng từ Google Sheets...", true);
     
+    // Tải dữ liệu từ tất cả các tab cấu hình (Lich_truc, Thang_09, Thang_10...)
     let allShifts = [];
-    for (const name of SHEET_NAMES) {{
+    for (const name of SHEET_NAMES) {
         const list = await fetchSheetData(name);
-        if (list && list.length > 0) {{
+        if (list && list.length > 0) {
             allShifts = allShifts.concat(list);
-        }}
-    }}
+        }
+    }
 
-    if (allShifts.length > 0) {{
+    if (allShifts.length > 0) {
+        // Gom dữ liệu trùng ngày và ca
         const map = new Map();
-        allShifts.forEach(item => map.set(`${{item.ngay}}_${{item.ca}}`, item));
-        SCHEDULE_DATA = Array.from(map.values()).sort((a,b) => {{
+        allShifts.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
+        SCHEDULE_DATA = Array.from(map.values()).sort((a,b) => {
             if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
             return a.ca - b.ca;
-        }});
+        });
 
         localStorage.setItem('SCHEDULE_DATA_VHLD_GGSHEET', JSON.stringify(SCHEDULE_DATA));
         updateStatusDisplay();
         traCuuTheoNgay();
-        if (forceAlert) alert(`Đã đồng bộ thành công ${{SCHEDULE_DATA.length}} ca trực!`);
-    }} else {{
+        if (forceAlert) alert(`Đã đồng bộ thành công ${SCHEDULE_DATA.length} ca trực các tháng!`);
+    } else {
         updateStatusDisplay("Chưa tải được dữ liệu (Hãy kiểm tra quyền chia sẻ công khai bảng tính)!", false);
-    }}
-}}
+    }
+}
 
-function getCurrentShift(now) {{
+function getCurrentShift(now) {
     const totalMinutes = now.getHours() * 60 + now.getMinutes();
     
-    function formatDate(d) {{
+    function formatDate(d) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        return {{ dateStr: `${{y}}-${{m}}-${{day}}`, displayDate: `${{day}}/${{m}}/${{y}}` }};
-    }}
+        return { dateStr: `${y}-${m}-${day}`, displayDate: `${day}/${m}/${y}` };
+    }
 
     const todayInfo = formatDate(now);
     const dayShifts = SCHEDULE_DATA.filter(x => x.ngay === todayInfo.dateStr);
@@ -306,114 +303,114 @@ function getCurrentShift(now) {{
     let ca = 1;
     let target = new Date(now);
 
-    if (isTwoShiftDay) {{
-        if (totalMinutes >= 360 && totalMinutes < 1080) {{
+    if (isTwoShiftDay) {
+        if (totalMinutes >= 360 && totalMinutes < 1080) {
             ca = 1;
-        }} else {{
+        } else {
             ca = 2;
             if (totalMinutes < 360) target.setDate(target.getDate() - 1);
-        }}
-    }} else {{
-        if (totalMinutes >= 360 && totalMinutes < 840) {{
+        }
+    } else {
+        if (totalMinutes >= 360 && totalMinutes < 840) {
             ca = 1;
-        }} else if (totalMinutes >= 840 && totalMinutes < 1320) {{
+        } else if (totalMinutes >= 840 && totalMinutes < 1320) {
             ca = 2;
-        }} else {{
+        } else {
             ca = 3;
             if (totalMinutes < 360) target.setDate(target.getDate() - 1);
-        }}
-    }}
+        }
+    }
 
     const res = formatDate(target);
-    return {{ dateStr: res.dateStr, displayDate: res.displayDate, ca: ca };
-}}
+    return { dateStr: res.dateStr, displayDate: res.displayDate, ca: ca };
+}
 
-function renderShifts(shifts, titleText) {{
+function renderShifts(shifts, titleText) {
     const out = document.getElementById('outputArea');
-    if (!shifts || shifts.length === 0) {{
+    if (!shifts || shifts.length === 0) {
         out.innerHTML = `<div style="color: #dc3545; text-align: center; padding: 15px; font-weight: bold;">Chưa có dữ liệu cho thời điểm này!</div>`;
         return;
-    }}
+    }
 
-    let html = `<div style="font-weight: bold; color: #495057; margin-bottom: 10px; font-size: 0.95rem;">${{titleText}}</div>`;
-    shifts.forEach(s => {{
+    let html = `<div style="font-weight: bold; color: #495057; margin-bottom: 10px; font-size: 0.95rem;">${titleText}</div>`;
+    shifts.forEach(s => {
         html += `
             <div class="card-shift">
                 <div class="card-shift-header">
                     <div>
-                        <span class="shift-name">CA ${{s.ca}}</span>
-                        <span style="font-size: 0.85rem; color: #6c757d; margin-left: 5px;">(${{s.gio}})</span>
+                        <span class="shift-name">CA ${s.ca}</span>
+                        <span style="font-size: 0.85rem; color: #6c757d; margin-left: 5px;">(${s.gio})</span>
                     </div>
-                    <span class="shift-badge">${{s.to}}</span>
+                    <span class="shift-badge">${s.to}</span>
                 </div>
-                <div class="row-info"><b>👤 Điều hành:</b> ${{s.dieu_hanh}}</div>
-                <div class="row-info"><b>🔹 Phó ca:</b> ${{s.pho_ca}}</div>
-                <div class="row-info"><b>⚡ Phương thức:</b> ${{s.phuong_thuc}}</div>
+                <div class="row-info"><b>👤 Điều hành:</b> ${s.dieu_hanh}</div>
+                <div class="row-info"><b>🔹 Phó ca:</b> ${s.pho_ca}</div>
+                <div class="row-info"><b>⚡ Phương thức:</b> ${s.phuong_thuc}</div>
                 
                 <div class="area-block">
                     <div class="area-title">📍 Khu vực ĐLTDM:</div>
                     <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${{s.tdm1}}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${{s.tdm2}}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tdm1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tdm2}</span></div>
                     </div>
                 </div>
 
                 <div class="area-block">
                     <div class="area-title">📍 Khu vực ĐLTT:</div>
                     <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${{s.tt1}}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${{s.tt2}}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tt1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tt2}</span></div>
                     </div>
                 </div>
 
                 <div class="area-block">
                     <div class="area-title">📍 Khu vực ĐLTU, BTU:</div>
                     <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${{s.tu1}}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${{s.tu2}}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tu1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tu2}</span></div>
                     </div>
                 </div>
             </div>
         `;
-    }});
+    });
     out.innerHTML = html;
-}}
+}
 
-function traCuuHienTai() {{
+function traCuuHienTai() {
     const now = new Date();
     const cur = getCurrentShift(now);
     const item = SCHEDULE_DATA.find(x => x.ngay === cur.dateStr && x.ca === cur.ca);
-    renderShifts(item ? [item] : [], `📌 ĐANG TRỰC HIỆN TẠI (CA ${{cur.ca}} - ${{cur.displayDate}})`);
-}}
+    renderShifts(item ? [item] : [], `📌 ĐANG TRỰC HIỆN TẠI (CA ${cur.ca} - ${cur.displayDate})`);
+}
 
-function traCuuHomNay() {{
+function traCuuHomNay() {
     const today = new Date();
     const y = today.getFullYear();
     const m = String(today.getMonth() + 1).padStart(2, '0');
     const d = String(today.getDate()).padStart(2, '0');
-    const dateStr = `${{y}}-${{m}}-${{d}}`;
-    const displayDate = `${{d}}/${{m}}/${{y}}`;
+    const dateStr = `${y}-${m}-${d}`;
+    const displayDate = `${d}/${m}/${y}`;
 
     document.getElementById('inputDate').value = dateStr;
     const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📅 TOÀN BỘ KÍP TRỰC HÔM NAY (${{displayDate}})`);
-}}
+    renderShifts(items, `📅 TOÀN BỘ KÍP TRỰC HÔM NAY (${displayDate})`);
+}
 
-function traCuuNgayMai() {{
+function traCuuNgayMai() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const y = tomorrow.getFullYear();
     const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const d = String(tomorrow.getDate()).padStart(2, '0');
-    const dateStr = `${{y}}-${{m}}-${{d}}`;
-    const displayDate = `${{d}}/${{m}}/${{y}}`;
+    const dateStr = `${y}-${m}-${d}`;
+    const displayDate = `${d}/${m}/${y}`;
 
     document.getElementById('inputDate').value = dateStr;
     const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📆 TOÀN BỘ KÍP TRỰC NGÀY MAI (${{displayDate}})`);
-}}
+    renderShifts(items, `📆 TOÀN BỘ KÍP TRỰC NGÀY MAI (${displayDate})`);
+}
 
-function chuyenNgay(offset) {{
+function chuyenNgay(offset) {
     const el = document.getElementById('inputDate');
     if (!el.value) return;
     const parts = el.value.split('-');
@@ -422,42 +419,43 @@ function chuyenNgay(offset) {{
     const y = cur.getFullYear();
     const m = String(cur.getMonth() + 1).padStart(2, '0');
     const d = String(cur.getDate()).padStart(2, '0');
-    el.value = `${{y}}-${{m}}-${{d}}`;
+    el.value = `${y}-${m}-${d}`;
     traCuuTheoNgay();
-}}
+}
 
-function traCuuTheoNgay() {{
+function traCuuTheoNgay() {
     const val = document.getElementById('inputDate').value;
     if (!val) return;
     const parts = val.split('-');
-    const displayDate = `${{parts[2]}}/${{parts[1]}}/${{parts[0]}}`;
+    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
     const items = SCHEDULE_DATA.filter(x => x.ngay === val).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📋 KÍP TRỰC NGÀY ${{displayDate}}`);
-}}
+    renderShifts(items, `📋 KÍP TRỰC NGÀY ${displayDate}`);
+}
 
-(async function init() {{
+(async function init() {
     const today = new Date();
     const yInit = today.getFullYear();
     const mInit = String(today.getMonth() + 1).padStart(2, '0');
     const dInit = String(today.getDate()).padStart(2, '0');
-    document.getElementById('inputDate').value = `${{yInit}}-${{mInit}}-${{dInit}}`;
+    document.getElementById('inputDate').value = `${yInit}-${mInit}-${dInit}`;
 
     const cached = localStorage.getItem('SCHEDULE_DATA_VHLD_GGSHEET');
-    if (cached) {{
-        try {{
+    if (cached) {
+        try {
             SCHEDULE_DATA = JSON.parse(cached);
             updateStatusDisplay();
             traCuuTheoNgay();
-        }} catch(e) {{}}
-    }}
+        } catch(e) {}
+    }
     await syncAllMonths();
-}})();
+})();
 </script>
 
 </body>
-</html>"""
+</html>
+"""
 
 with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_code)
+    f.write(raw_html)
 
-print("Đã tạo file index.html hỗ trợ cuốn chiếu 2 tháng hoàn chỉnh.")
+print("Đã tạo file index.html hoàn toàn chuẩn sạch!")
