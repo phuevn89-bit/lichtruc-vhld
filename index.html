@@ -1,7 +1,4 @@
-# Tạo file index.html chuẩn sạch 100% không dính 1 chữ python nào
-sheet_id = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4"
-
-raw_html = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -88,8 +85,12 @@ raw_html = """<!DOCTYPE html>
 // CẤU HÌNH GOOGLE SHEETS
 // ==========================================
 const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
-// Danh sách các sheet tên tháng mà hệ thống sẽ tự động quét và gom chung
-const SHEET_NAMES = ["Thang_09", "Thang_10", "Thang_11", "Thang_12", "Thang_01", "Thang_02", "Thang_03", "Thang_04", "Thang_05", "Thang_06", "Thang_07", "Thang_08", "Lich_truc"];
+const SHEET_NAMES = [
+    "Thang_09", "Thang_10", "Thang_11", "Thang_12", 
+    "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
+    "Thang_05", "Thang_06", "Thang_07", "Thang_08", 
+    "Lich_truc"
+];
 
 let SCHEDULE_DATA = [];
 
@@ -165,11 +166,11 @@ function updateStatusDisplay(msg, isSuccess) {
 
 function formatWorker(name, driverStr) {
     if (!name) return "";
-    name = String(name).trim().replace(/\\n/g, ' ');
+    name = String(name).trim().replace(/\n/g, ' ');
     if (!name) return "";
     if (driverStr) {
         const cleanDrv = driverStr.toLowerCase();
-        const shortName = name.replace(/\\(.*\\)/g, '').trim().toLowerCase();
+        const shortName = name.replace(/\(.*\)/g, '').trim().toLowerCase();
         if (shortName && cleanDrv.includes(shortName)) {
             return name + " 🚗";
         }
@@ -195,7 +196,7 @@ function parseWorkbookRows(rows) {
 
         let dateVal = row[0];
         if (dateVal !== "") {
-            let s = String(dateVal).trim().replace(/\\/+/g, '/');
+            let s = String(dateVal).trim().replace(/\/+/g, '/');
             if (s.includes('/')) {
                 const p = s.split('/');
                 if (p.length === 3) lastDateStr = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
@@ -206,7 +207,7 @@ function parseWorkbookRows(rows) {
 
         if (!lastDateStr) continue;
 
-        const dieuHanhStr = String(row[2] || row[3] || "").replace(/\\n/g, ' ').trim();
+        const dieuHanhStr = String(row[2] || row[3] || "").replace(/\n/g, ' ').trim();
         const phoCaStr = [row[4], row[5]].filter(x => x && String(x).trim() !== "").join(" | ");
         const phuongThucStr = String(row[6] || "").trim();
 
@@ -259,7 +260,6 @@ async function fetchSheetData(sheetName) {
 async function syncAllMonths(forceAlert = false) {
     updateStatusDisplay("Đang đồng bộ dữ liệu các tháng từ Google Sheets...", true);
     
-    // Tải dữ liệu từ tất cả các tab cấu hình (Lich_truc, Thang_09, Thang_10...)
     let allShifts = [];
     for (const name of SHEET_NAMES) {
         const list = await fetchSheetData(name);
@@ -269,7 +269,6 @@ async function syncAllMonths(forceAlert = false) {
     }
 
     if (allShifts.length > 0) {
-        // Gom dữ liệu trùng ngày và ca
         const map = new Map();
         allShifts.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
         SCHEDULE_DATA = Array.from(map.values()).sort((a,b) => {
@@ -453,9 +452,3 @@ function traCuuTheoNgay() {
 
 </body>
 </html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(raw_html)
-
-print("Đã tạo file index.html hoàn toàn chuẩn sạch!")
