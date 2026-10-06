@@ -14,7 +14,7 @@
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
         .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-now { background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }
-        .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(111,94,215,0.3); }
+        .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }
         .btn-tomorrow { background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }
         .separator { text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }
         .separator::before, .separator::after { content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }
@@ -23,7 +23,7 @@
         
         .search-box { display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }
         .search-box input[type="date"] { flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }
-        .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
+        .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
         .btn-step:hover { background: #343a40; }
         .btn-step-next { background: #0b5394; }
         .btn-step-next:hover { background: #083c6c; }
@@ -86,7 +86,7 @@ const SHEET_NAMES = [
     "Thang_09", "Thang_10", "Thang_11", "Thang_12", 
     "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
     "Thang_05", "Thang_06", "Thang_07", "Thang_08", 
-    "Lich_truc"
+    "Lich_truc", "Lich_truc (2)", "Trang tính 1"
 ];
 
 let SCHEDULE_DATA = [];
@@ -196,7 +196,13 @@ function parseWorkbookRows(rows) {
             let s = String(dateVal).trim().replace(/\/+/g, '/');
             if (s.includes('/')) {
                 const p = s.split('/');
-                if (p.length === 3) lastDateStr = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                if (p.length === 3) {
+                    const y = (p[2].length === 2) ? "20" + p[2] : p[2];
+                    lastDateStr = `${y}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+                    if (Number(p[0]) > 12) {
+                        lastDateStr = `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                    }
+                }
             } else if (s.includes('-')) {
                 lastDateStr = s.substring(0, 10);
             }
