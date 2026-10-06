@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kíp Trực Đội VHLĐ</title>
+    <!-- Thư viện SheetJS đọc file Excel gốc -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding: 12px; }
+        .app-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .header-title { text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-now { background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }
+        .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }
+        .btn-tomorrow { background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }
+        .separator { text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }
+        .separator::before, .separator::after { content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }
+        .separator::before { left: 0; }
+        .separator::after { right: 0; }
+        
+        /* Khu vực chọn ngày kèm nút lùi / tiến nhanh */
+        .search-box { display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }
+        .search-box input[type="date"] { flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }
+        .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
+        .btn-step:hover { background: #343a40; }
+        .btn-step-next { background: #0b5394; }
+        .btn-step-next:hover { background: #083c6c; }
+
+        .card-shift { background: #fff; border: 1px solid #ced4da; border-left: 5px solid #0b5394; border-radius: 8px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-shift-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px; }
+        .shift-name { font-weight: bold; font-size: 1.05rem; color: #0b5394; }
+        .shift-badge { background: #fd7e14; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .row-info { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }
+        
+        .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
+        .area-title { font-weight: 700; color: #0b5394; font-size: 0.92rem; margin-bottom: 5px; }
+        .pair-row { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; }
+        .pair-item { display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+        .pair-label { font-weight: 600; color: #495057; min-width: 52px; }
+        .pair-val { color: #212529; }
+        
+        .admin-box { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #dee2e6; text-align: center; }
+        .upload-label { 
+            background: #0d6efd; 
+            color: #fff; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px; 
+            box-shadow: 0 2px 6px rgba(13,110,253,0.3); 
+            user-select: none;
+        }
+        .upload-label:hover { background: #0b5ed7; }
+        .btn-clear {
+            background: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-clear:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+        .status-msg { margin-top: 10px; font-size: 0.85rem; font-weight: 600; line-height: 1.4; }
+        .footer-note { text-align: center; font-size: 0.78rem; color: #6c757d; margin-top: 15px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header-title">⚡ TRA CỨU KÍP TRỰC ĐỘI VHLĐ</div>
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-now" onclick="traCuuHienTai()">🕒 AI ĐANG TRỰC BÂY GIỜ?</button>
+        <button type="button" class="btn btn-today" onclick="traCuuHomNay()">📅 AI TRỰC HÔM NAY?</button>
+        <button type="button" class="btn btn-tomorrow" onclick="traCuuNgayMai()">📆 AI TRỰC NGÀY MAI?</button>
+    </div>
+
+    <div class="separator">HOẶC CHỌN NGÀY BẤT KỲ</div>
+
+    <div class="search-box">
+        <button type="button" class="btn-step" onclick="chuyenNgay(-1)" title="Lùi 1 ngày">◀ Ngày trước</button>
+        <input type="date" id="inputDate" onchange="traCuuTheoNgay()">
+        <button type="button" class="btn-step btn-step-next" onclick="chuyenNgay(1)" title="Tiến 1 ngày">Ngày sau ▶</button>
+    </div>
+
+    <div id="outputArea"></div>
+
+    <div class="footer-note">
+        Dữ liệu nguồn: Lịch trực Đội VHLĐ<br>
+        <i>* Ký hiệu: <b>(TN)</b>: Trưởng nhóm | <b>🚗</b>: Kiêm lái xe</i>
+    </div>
+
+    <div class="admin-box">
+        <label for="excelInput" class="upload-label">
+            📊 NẠP LỊCH TỪ FILE EXCEL GỐC (.XLS / .XLSX)
+        </label>
+        <input type="file" id="excelInput" accept=".xlsx, .xls" multiple style="display: none;" onchange="handleExcelUpload(event)">
+        <div id="uploadStatus" class="status-msg"></div>
+        <button type="button" class="btn-clear" onclick="clearData()">🗑️ Xóa toàn bộ lịch đã lưu</button>
+    </div>
+</div>
+
+<script>
+let SCHEDULE_DATA = [];
+
+function standardizeSchedule(list) {
+    if (!list || list.length === 0) return [];
+    
+    const grouped = {};
+    list.forEach(item => {
+        if (!grouped[item.ngay]) grouped[item.ngay] = [];
+        grouped[item.ngay].push(item);
+    });
+
+    const result = [];
+    Object.keys(grouped).forEach(ngay => {
+        const shifts = grouped[ngay];
+        
+        const ca2 = shifts.find(x => (x.origCa === 2 || x.ca === 2));
+        const hasCa2Content = ca2 && (
+            (ca2.dieu_hanh && ca2.dieu_hanh !== "---" && ca2.dieu_hanh.trim() !== "") ||
+            (ca2.tdm1 && ca2.tdm1 !== "---") ||
+            (ca2.tt1 && ca2.tt1 !== "---") ||
+            (ca2.tu1 && ca2.tu1 !== "---")
+        );
+
+        const isTwoShiftDay = !hasCa2Content;
+
+        if (isTwoShiftDay) {
+            shifts.forEach(s => {
+                const caIdx = s.origCa || s.ca;
+                if (caIdx === 1) {
+                    s.ca = 1;
+                    s.gio = "06h00 - 18h00";
+                    result.push(s);
+                } else if (caIdx === 3) {
+                    s.ca = 2;
+                    s.gio = "18h00 - 06h00";
+                    result.push(s);
+                }
+            });
+        } else {
+            shifts.forEach(s => {
+                const caIdx = s.origCa || s.ca;
+                s.ca = caIdx;
+                s.gio = (s.ca === 1) ? "06h00 - 14h00" : (s.ca === 2) ? "14h00 - 22h00" : "22h00 - 06h00";
+                result.push(s);
+            });
+        }
+    });
+
+    return result.sort((a,b) => {
+        if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
+        return a.ca - b.ca;
+    });
+}
+
+function updateStatusDisplay() {
+    const statusEl = document.getElementById('uploadStatus');
+    if (SCHEDULE_DATA.length > 0) {
+        const dates = Array.from(new Set(SCHEDULE_DATA.map(x => x.ngay))).sort();
+        const fromDate = formatDateStr(dates[0]);
+        const toDate = formatDateStr(dates[dates.length - 1]);
+        statusEl.innerHTML = `<span style="color:#198754">✓ Đã lưu ${SCHEDULE_DATA.length} ca trực (${fromDate} ➔ ${toDate})</span>`;
+    } else {
+        statusEl.innerHTML = `<span style="color:#6c757d">Chưa có dữ liệu ca trực</span>`;
+    }
+}
+
+function formatDateStr(dStr) {
+    if (!dStr) return "";
+    const p = dStr.split('-');
+    return `${p[2]}/${p[1]}/${p[0]}`;
+}
+
+const savedData = localStorage.getItem('SCHEDULE_DATA_VHLD_EXCEL');
+if (savedData) {
+    try { 
+        const raw = JSON.parse(savedData);
+        SCHEDULE_DATA = standardizeSchedule(raw);
+        localStorage.setItem('SCHEDULE_DATA_VHLD_EXCEL', JSON.stringify(SCHEDULE_DATA));
+    } catch(e) {}
+}
+
+function formatWorker(name, driverStr) {
+    if (!name) return "";
+    name = String(name).trim().replace(/\n/g, ' ');
+    if (!name) return "";
+    if (driverStr) {
+        const cleanDrv = driverStr.toLowerCase();
+        const shortName = name.replace(/\(.*\)/g, '').trim().toLowerCase();
+        if (shortName && cleanDrv.includes(shortName)) {
+            return name + " 🚗";
+        }
+    }
+    return name;
+}
+
+function formatPair(list) {
+    const valid = list.filter(x => x && x.trim() !== "");
+    return valid.length > 0 ? valid.join(" - ") : "---";
+}
+
+function excelSerialToDateStr(serial) {
+    const utcDays = Math.floor(serial - 25569);
+    const date = new Date(utcDays * 86400 * 1000);
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(date.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseWorkbook(workbook) {
+    let sheetName = workbook.SheetNames.find(s => s.trim().toLowerCase() === 'lich_truc');
+    if (!sheetName) {
+        sheetName = workbook.SheetNames.find(s => s.toLowerCase().includes('lich')) || workbook.SheetNames[0];
+    }
+    
+    const targetSheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(targetSheet, { header: 1, defval: "" });
+    if (!rows || rows.length < 5) return [];
+
+    const rawShifts = [];
+    let lastDateStr = "";
+
+    for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
+        const caVal = row[1];
+        if (caVal === "" || isNaN(Number(caVal))) continue;
+        const caNum = Number(caVal);
+        if (![1, 2, 3].includes(caNum)) continue;
+
+        let dateVal = row[0];
+        if (dateVal !== "") {
+            if (typeof dateVal === 'number') {
+                lastDateStr = excelSerialToDateStr(dateVal);
+            } else if (dateVal instanceof Date) {
+                const y = dateVal.getFullYear();
+                const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+                const d = String(dateVal.getDate()).padStart(2, '0');
+                lastDateStr = `${y}-${m}-${d}`;
+            } else {
+                // Tự động gom // thành / tránh lỗi gõ nhầm
+                let s = String(dateVal).trim().replace(/\/+/g, '/');
+                if (s.includes('/')) {
+                    const p = s.split('/');
+                    if (p.length === 3) lastDateStr = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                } else if (s.includes('-')) {
+                    lastDateStr = s.substring(0, 10);
+                }
+            }
+        }
+
+        if (!lastDateStr) continue;
+
+        const dieuHanhStr = String(row[2] || row[3] || "").replace(/\n/g, ' ').trim();
+        const phoCaStr = [row[4], row[5]].filter(x => x && String(x).trim() !== "").join(" | ");
+        const phuongThucStr = String(row[6] || "").trim();
+
+        const lx_tdm = String(row[12] || "");
+        const tdm1 = formatPair([formatWorker(row[7], lx_tdm), formatWorker(row[8], lx_tdm)]);
+        const tdm2 = formatPair([formatWorker(row[9], lx_tdm), formatWorker(row[10], lx_tdm), formatWorker(row[11], lx_tdm)]);
+
+        const lx_tt = String(row[18] || "");
+        const tt1 = formatPair([formatWorker(row[13], lx_tt), formatWorker(row[14], lx_tt)]);
+        const tt2 = formatPair([formatWorker(row[15], lx_tt), formatWorker(row[16], lx_tt), formatWorker(row[17], lx_tt)]);
+
+        const lx_tu = String(row[24] || "");
+        const tu1 = formatPair([formatWorker(row[19], lx_tu), formatWorker(row[20], lx_tu)]);
+        const tu2 = formatPair([formatWorker(row[21], lx_tu), formatWorker(row[22], lx_tu), formatWorker(row[23], lx_tu)]);
+
+        rawShifts.push({
+            ngay: lastDateStr,
+            origCa: caNum,
+            ca: caNum,
+            to: String(row[25] || "").trim() || `Tổ VHLĐ`,
+            dieu_hanh: dieuHanhStr,
+            pho_ca: phoCaStr || "---",
+            phuong_thuc: phuongThucStr || "---",
+            tdm1: tdm1,
+            tdm2: tdm2,
+            tt1: tt1,
+            tt2: tt2,
+            tu1: tu1,
+            tu2: tu2
+        });
+    }
+
+    return standardizeSchedule(rawShifts);
+}
+
+async function handleExcelUpload(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const statusEl = document.getElementById('uploadStatus');
+    statusEl.innerHTML = `<span style="color:#0d6efd">Đang đọc ${files.length} file...</span>`;
+
+    let newlyParsed = [];
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+            const buffer = await file.arrayBuffer();
+            const data = new Uint8Array(buffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const list = parseWorkbook(workbook);
+            newlyParsed = newlyParsed.concat(list);
+        } catch (err) {
+            console.error("Lỗi file " + file.name, err);
+        }
+    }
+
+    if (newlyParsed.length === 0) {
+        statusEl.innerHTML = `<span style="color:#dc3545">❌ Không nhận diện được dữ liệu ca trực từ file đã chọn!</span>`;
+        return;
+    }
+
+    const mapData = new Map();
+    SCHEDULE_DATA.forEach(item => mapData.set(`${item.ngay}_${item.ca}`, item));
+    newlyParsed.forEach(item => mapData.set(`${item.ngay}_${item.ca}`, item));
+
+    SCHEDULE_DATA = Array.from(mapData.values()).sort((a,b) => {
+        if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
+        return a.ca - b.ca;
+    });
+
+    localStorage.setItem('SCHEDULE_DATA_VHLD_EXCEL', JSON.stringify(SCHEDULE_DATA));
+    updateStatusDisplay();
+    traCuuTheoNgay();
+    event.target.value = "";
+}
+
+function clearData() {
+    if (confirm("Anh có chắc muốn xoá toàn bộ lịch trực đã lưu trên máy không?")) {
+        SCHEDULE_DATA = [];
+        localStorage.removeItem('SCHEDULE_DATA_VHLD_EXCEL');
+        updateStatusDisplay();
+        document.getElementById('outputArea').innerHTML = "";
+    }
+}
+
+function getCurrentShift(now) {
+    const totalMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    function formatDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return { dateStr: `${y}-${m}-${day}`, displayDate: `${day}/${m}/${y}` };
+    }
+
+    const todayInfo = formatDate(now);
+    const dayShifts = SCHEDULE_DATA.filter(x => x.ngay === todayInfo.dateStr);
+    const isTwoShiftDay = (dayShifts.length > 0 && dayShifts.length <= 2 && dayShifts.some(x => x.gio.includes("18h00")));
+
+    let ca = 1;
+    let target = new Date(now);
+
+    if (isTwoShiftDay) {
+        if (totalMinutes >= 360 && totalMinutes < 1080) {
+            ca = 1;
+        } else {
+            ca = 2;
+            if (totalMinutes < 360) target.setDate(target.getDate() - 1);
+        }
+    } else {
+        if (totalMinutes >= 360 && totalMinutes < 840) {
+            ca = 1;
+        } else if (totalMinutes >= 840 && totalMinutes < 1320) {
+            ca = 2;
+        } else {
+            ca = 3;
+            if (totalMinutes < 360) target.setDate(target.getDate() - 1);
+        }
+    }
+
+    const res = formatDate(target);
+    return { dateStr: res.dateStr, displayDate: res.displayDate, ca: ca };
+}
+
+function renderShifts(shifts, titleText) {
+    const out = document.getElementById('outputArea');
+    if (!shifts || shifts.length === 0) {
+        out.innerHTML = `<div style="color: #dc3545; text-align: center; padding: 15px; font-weight: bold;">Chưa có dữ liệu cho thời điểm này!</div>`;
+        return;
+    }
+
+    let html = `<div style="font-weight: bold; color: #495057; margin-bottom: 10px; font-size: 0.95rem;">${titleText}</div>`;
+    shifts.forEach(s => {
+        html += `
+            <div class="card-shift">
+                <div class="card-shift-header">
+                    <div>
+                        <span class="shift-name">CA ${s.ca}</span>
+                        <span style="font-size: 0.85rem; color: #6c757d; margin-left: 5px;">(${s.gio})</span>
+                    </div>
+                    <span class="shift-badge">${s.to}</span>
+                </div>
+                <div class="row-info"><b>👤 Điều hành:</b> ${s.dieu_hanh}</div>
+                <div class="row-info"><b>🔹 Phó ca:</b> ${s.pho_ca}</div>
+                <div class="row-info"><b>⚡ Phương thức:</b> ${s.phuong_thuc}</div>
+                
+                <div class="area-block">
+                    <div class="area-title">📍 Khu vực ĐLTDM:</div>
+                    <div class="pair-row">
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tdm1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tdm2}</span></div>
+                    </div>
+                </div>
+
+                <div class="area-block">
+                    <div class="area-title">📍 Khu vực ĐLTT:</div>
+                    <div class="pair-row">
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tt1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tt2}</span></div>
+                    </div>
+                </div>
+
+                <div class="area-block">
+                    <div class="area-title">📍 Khu vực ĐLTU, BTU:</div>
+                    <div class="pair-row">
+                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tu1}</span></div>
+                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tu2}</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    out.innerHTML = html;
+}
+
+function traCuuHienTai() {
+    const now = new Date();
+    const cur = getCurrentShift(now);
+    const item = SCHEDULE_DATA.find(x => x.ngay === cur.dateStr && x.ca === cur.ca);
+    renderShifts(item ? [item] : [], `📌 ĐANG TRỰC HIỆN TẠI (CA ${cur.ca} - ${cur.displayDate})`);
+}
+
+function traCuuHomNay() {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    const displayDate = `${d}/${m}/${y}`;
+
+    document.getElementById('inputDate').value = dateStr;
+    const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
+    renderShifts(items, `📅 TOÀN BỘ KÍP TRỰC HÔM NAY (${displayDate})`);
+}
+
+function traCuuNgayMai() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const y = tomorrow.getFullYear();
+    const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const d = String(tomorrow.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    const displayDate = `${d}/${m}/${y}`;
+
+    document.getElementById('inputDate').value = dateStr;
+    const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
+    renderShifts(items, `📆 TOÀN BỘ KÍP TRỰC NGÀY MAI (${displayDate})`);
+}
+
+// Hàm chuyển lùi hoặc tiến 1 ngày so với ngày đang hiển thị
+function chuyenNgay(offset) {
+    const el = document.getElementById('inputDate');
+    if (!el.value) return;
+    const parts = el.value.split('-');
+    const cur = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    cur.setDate(cur.getDate() + offset);
+    const y = cur.getFullYear();
+    const m = String(cur.getMonth() + 1).padStart(2, '0');
+    const d = String(cur.getDate()).padStart(2, '0');
+    el.value = `${y}-${m}-${d}`;
+    traCuuTheoNgay();
+}
+
+function traCuuTheoNgay() {
+    const val = document.getElementById('inputDate').value;
+    if (!val) {
+        alert("Vui lòng chọn ngày!");
+        return;
+    }
+    const parts = val.split('-');
+    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    const items = SCHEDULE_DATA.filter(x => x.ngay === val).sort((a,b) => a.ca - b.ca);
+    renderShifts(items, `📋 KÍP TRỰC NGÀY ${displayDate}`);
+}
+
+(function init() {
+    const today = new Date();
+    const yInit = today.getFullYear();
+    const mInit = String(today.getMonth() + 1).padStart(2, '0');
+    const dInit = String(today.getDate()).padStart(2, '0');
+    document.getElementById('inputDate').value = `${yInit}-${mInit}-${dInit}`;
+    updateStatusDisplay();
+    if (SCHEDULE_DATA.length > 0) traCuuTheoNgay();
+})();
+</script>
+
+</body>
+</html>
