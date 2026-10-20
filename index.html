@@ -33,7 +33,6 @@
     .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
     .area-title { font-weight: bold; color: #495057; margin-bottom: 4px; font-size: 0.88rem; }
     .area-detail { color: #212529; font-size: 0.9rem; }
-    .text-nowrap { white-space: nowrap; }
     .footer-action { margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 12px; text-align: center; }
     .btn-sync { background: #6c757d; border: none; border-radius: 6px; color: #fff; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
     .btn-sync:hover { background: #5a6268; }
@@ -75,24 +74,21 @@
 </div>
 
 <script>
-  // ID Google Spreadsheet
   const SPREADSHEET_ID = "1gMvdL68000s151O2a6J9g9n1w3yK_7n-l2zUe4lq-7k";
 
-  // Hàm lấy động sheet của tháng hiện tại và tháng kế tiếp
+  // Chỉ lấy tháng này và tháng tiếp theo
   function getActiveSheetNames() {
     const now = new Date();
     const curMonth = now.getMonth() + 1;
     const nextMonth = curMonth === 12 ? 1 : curMonth + 1;
-    
-    const curSheet = "Thang_" + String(curMonth).padStart(2, '0');
-    const nextSheet = "Thang_" + String(nextMonth).padStart(2, '0');
-    
-    return [curSheet, nextSheet];
+    return [
+      "Thang_" + String(curMonth).padStart(2, '0'),
+      "Thang_" + String(nextMonth).padStart(2, '0')
+    ];
   }
 
   let SCHEDULE_DATA = [];
 
-  // Tải bảng tính qua JSONP Google Visualization API
   function fetchSheetViaJsonp(sheetName) {
     return new Promise((resolve) => {
       const callbackName = "gvizCallback_" + Math.floor(Math.random() * 1000000);
@@ -129,20 +125,20 @@
     });
   }
 
-  // Phân tích dữ liệu bảng tính
+  // Quét toàn diện theo giá trị hiển thị f hoặc v
   function parseGvizTable(table) {
     const rows = table.rows;
     if (!rows || rows.length === 0) return [];
 
     let headerRowIndex = -1;
-    let colMap = {};
+    let colMap = { ngay: 0, ca: 1, tch: 2, dt: 3, vp: 4, tdm: 5, ta: 6, da: 7, bc: 8, tu: 9 };
 
-    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    for (let i = 0; i < Math.min(rows.length, 12); i++) {
       const r = rows[i];
       if (!r || !r.c) continue;
       for (let j = 0; j < r.c.length; j++) {
-        const val = r.c[j] ? String(r.c[j].v || "").toLowerCase().trim() : "";
-        if (val.includes("ngày") || val.includes("ngay")) {
+        const txt = getCellRawText(r.c[j]).toLowerCase();
+        if (txt.includes("ngày") || txt.includes("ngay")) {
           headerRowIndex = i;
           break;
         }
@@ -150,63 +146,61 @@
       if (headerRowIndex !== -1) break;
     }
 
-    if (headerRowIndex === -1) headerRowIndex = 0;
-
-    const headerRow = rows[headerRowIndex];
-    for (let j = 0; j < headerRow.c.length; j++) {
-      const cell = headerRow.c[j];
-      const val = cell ? String(cell.v || "").toLowerCase().trim() : "";
-      if (val.includes("ngày") || val.includes("ngay")) colMap.ngay = j;
-      else if (val.includes("ca")) colMap.ca = j;
-      else if (val.includes("trực chỉ huy") || val.includes("tch") || val.includes("chỉ huy")) colMap.tch = j;
-      else if (val.includes("đội trưởng") || val.includes("dt") || val.includes("trưởng kíp")) colMap.dt = j;
-      else if (val.includes("văn phòng") || val.includes("vp")) colMap.vp = j;
-      else if (val.includes("thủ dầu một") || val.includes("tdm")) colMap.tdm = j;
-      else if (val.includes("thuận an") || val.includes("ta")) colMap.ta = j;
-      else if (val.includes("dĩ an") || val.includes("da")) colMap.da = j;
-      else if (val.includes("bến cát") || val.includes("bc")) colMap.bc = j;
-      else if (val.includes("tân uyên") || val.includes("tu")) colMap.tu = j;
+    if (headerRowIndex !== -1) {
+      const hr = rows[headerRowIndex];
+      for (let j = 0; j < hr.c.length; j++) {
+        const txt = getCellRawText(hr.c[j]).toLowerCase();
+        if (txt.includes("ngày") || txt.includes("ngay")) colMap.ngay = j;
+        else if (txt === "ca" || txt.includes("ca trực")) colMap.ca = j;
+        else if (txt.includes("chỉ huy") || txt.includes("tch")) colMap.tch = j;
+        else if (txt.includes("đội trưởng") || txt.includes("trưởng kíp") || txt.includes("dt")) colMap.dt = j;
+        else if (txt.includes("văn phòng") || txt.includes("vp")) colMap.vp = j;
+        else if (txt.includes("dầu một") || txt.includes("tdm")) colMap.tdm = j;
+        else if (txt.includes("thuận an") || txt.includes("ta")) colMap.ta = j;
+        else if (txt.includes("dĩ an") || txt.includes("da")) colMap.da = j;
+        else if (txt.includes("bến cát") || txt.includes("bc")) colMap.bc = j;
+        else if (txt.includes("tân uyên") || txt.includes("tu")) colMap.tu = j;
+      }
+    } else {
+      headerRowIndex = 0;
     }
-
-    if (colMap.ngay === undefined) colMap.ngay = 0;
-    if (colMap.ca === undefined) colMap.ca = 1;
 
     const list = [];
     for (let i = headerRowIndex + 1; i < rows.length; i++) {
       const r = rows[i];
       if (!r || !r.c) continue;
 
-      let ngayRaw = getCellValue(r.c[colMap.ngay]);
-      let caRaw = getCellValue(r.c[colMap.ca]);
+      let ngayRaw = getCellRawText(r.c[colMap.ngay]);
+      let caRaw = getCellRawText(r.c[colMap.ca]);
 
       if (!ngayRaw || !caRaw) continue;
 
       let ngayFormatted = formatDateString(ngayRaw);
-      let caNum = parseInt(String(caRaw).replace(/[^0-9]/g, ""), 10);
+      let caNum = parseInt(caRaw.replace(/[^0-9]/g, ""), 10);
 
       if (!ngayFormatted || isNaN(caNum)) continue;
 
       list.push({
         ngay: ngayFormatted,
         ca: caNum,
-        tch: getCellValue(r.c[colMap.tch]),
-        dt: getCellValue(r.c[colMap.dt]),
-        vp: getCellValue(r.c[colMap.vp]),
-        tdm: getCellValue(r.c[colMap.tdm]),
-        ta: getCellValue(r.c[colMap.ta]),
-        da: getCellValue(r.c[colMap.da]),
-        bc: getCellValue(r.c[colMap.bc]),
-        tu: getCellValue(r.c[colMap.tu])
+        tch: getCellRawText(r.c[colMap.tch]),
+        dt: getCellRawText(r.c[colMap.dt]),
+        vp: getCellRawText(r.c[colMap.vp]),
+        tdm: getCellRawText(r.c[colMap.tdm]),
+        ta: getCellRawText(r.c[colMap.ta]),
+        da: getCellRawText(r.c[colMap.da]),
+        bc: getCellRawText(r.c[colMap.bc]),
+        tu: getCellRawText(r.c[colMap.tu])
       });
     }
 
     return list;
   }
 
-  function getCellValue(cell) {
+  function getCellRawText(cell) {
     if (!cell) return "";
-    if (cell.f) return String(cell.f).trim();
-    if (cell.v !== null && cell.v !== undefined) {
+    if (cell.f !== undefined && cell.f !== null) return String(cell.f).trim();
+    if (cell.v !== undefined && cell.v !== null) {
       if (typeof cell.v === "string" && cell.v.startsWith("Date(")) {
         const parts = cell.v.match(/\d+/g);
         if (parts && parts.length >= 3) {
@@ -238,7 +232,6 @@
     return "";
   }
 
-  // Đồng bộ tháng hiện tại và tháng kế tiếp qua Promise.all
   async function syncAllMonths(forceAlert = false) {
     if (forceAlert || SCHEDULE_DATA.length === 0) {
       updateStatusDisplay("Đang đồng bộ dữ liệu từ Google Sheets...", true);
@@ -284,7 +277,7 @@
       el.textContent = msg;
       el.style.color = isSyncing ? "#0b5ed7" : "#dc3545";
     } else {
-      el.innerHTML = `✓ Dữ liệu sẵn sàng: <b>${SCHEDULE_DATA.length}</b> ca trực (Tháng này & Tháng tới)`;
+      el.innerHTML = `✓ Dữ liệu sẵn sàng: <b>${SCHEDULE_DATA.length}</b> ca trực`;
       el.style.color = "#198754";
     }
   }
@@ -337,7 +330,7 @@
     const matches = SCHEDULE_DATA.filter(item => item.ngay === targetDate);
 
     if (matches.length === 0) {
-      container.innerHTML = `<div style="text-align: center; color: #6c757d; padding: 25px 0;">Không có thông tin lịch trực cho ngày <b>${targetDate}</b>.<br><small>(Dữ liệu tự động chỉ gồm tháng hiện tại và tháng tới)</small></div>`;
+      container.innerHTML = `<div style="text-align: center; color: #6c757d; padding: 25px 0;">Không có thông tin lịch trực cho ngày <b>${targetDate}</b>.</div>`;
       return;
     }
 
@@ -386,7 +379,7 @@
     if (found) {
       container.innerHTML = renderShiftCard(found, true);
     } else {
-      container.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 20px 0;">Chưa có dữ liệu ca trực hiện tại (Ca ${curCa} ngày ${todayStr}). Vui lòng bấm "Cập nhật từ Google Sheets".</div>`;
+      container.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 20px 0;">Chưa có dữ liệu ca trực hiện tại. Vui lòng bấm "Cập nhật từ Google Sheets".</div>`;
     }
   }
 
