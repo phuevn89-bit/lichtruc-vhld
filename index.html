@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
     body { background: #f0f2f5; margin: 0; padding: 12px; }
-    .app-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .app-container { max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
     .header-title { text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }
     .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -31,7 +31,7 @@
     .row-info { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }
     .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
     .area-title { font-weight: bold; color: #495057; margin-bottom: 4px; font-size: 0.88rem; }
-    .area-detail { color: #212529; font-size: 0.9rem; }
+    .area-detail { color: #212529; font-size: 0.9rem; line-height: 1.4; }
     .footer-action { margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 12px; text-align: center; }
     .btn-sync { background: #6c757d; border: none; border-radius: 6px; color: #fff; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
     .btn-sync:hover { background: #5a6268; }
@@ -73,7 +73,8 @@
 </div>
 
 <script>
-  const SPREADSHEET_ID = "1gMvdL68000s151O2a6J9g9n1w3yK_7n-l2zUe4lq-7k";
+  // ID chính xác của bảng tính "Lich Truc VHLD"
+  const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
 
   function getActiveSheetNames() {
     const now = new Date();
@@ -148,81 +149,81 @@
 
     const parts = str.split(/[/.-]/);
     if (parts.length === 3) {
-      let d = parts[0].padStart(2, '0');
-      let m = parts[1].padStart(2, '0');
+      // Trường hợp d/m/y hoặc m/d/y
+      let p1 = parts[0].padStart(2, '0');
+      let p2 = parts[1].padStart(2, '0');
       let y = parts[2];
       if (y.length === 2) y = "20" + y;
-      if (parseInt(d, 10) > 1900) return `${d}-${m}-${y}`;
-      return `${y}-${m}-${d}`;
+
+      if (parseInt(p1, 10) > 1900) return `${p1}-${p2}-${parts[2].padStart(2, '0')}`;
+      // Định dạng ngày của bảng tính là m/d/y hoặc d/m/y
+      if (parseInt(p1, 10) > 12) {
+        return `${y}-${p2}-${p1}`; // p1 là ngày
+      } else {
+        // Nhận diện theo 10/1/2026 (m/d/y trên sheet)
+        return `${y}-${p1}-${p2}`;
+      }
     }
     return "";
   }
 
+  // Đọc dữ liệu chuẩn xác theo cấu trúc bảng tính thực tế
   function parseGvizTable(table) {
     const rows = table.rows;
     if (!rows || rows.length === 0) return [];
 
-    let headerRowIndex = -1;
-    let colMap = { ngay: 0, ca: 1, tch: 2, dt: 3, vp: 4, tdm: 5, ta: 6, da: 7, bc: 8, tu: 9 };
-
-    for (let i = 0; i < Math.min(rows.length, 12); i++) {
-      const r = rows[i];
-      if (!r || !r.c) continue;
-      for (let j = 0; j < r.c.length; j++) {
-        const txt = getCellRawText(r.c[j]).toLowerCase();
-        if (txt.includes("ngày") || txt.includes("ngay")) {
-          headerRowIndex = i;
-          break;
-        }
-      }
-      if (headerRowIndex !== -1) break;
-    }
-
-    if (headerRowIndex !== -1) {
-      const hr = rows[headerRowIndex];
-      for (let j = 0; j < hr.c.length; j++) {
-        const txt = getCellRawText(hr.c[j]).toLowerCase();
-        if (txt.includes("ngày") || txt.includes("ngay")) colMap.ngay = j;
-        else if (txt === "ca" || txt.includes("ca trực")) colMap.ca = j;
-        else if (txt.includes("chỉ huy") || txt.includes("tch")) colMap.tch = j;
-        else if (txt.includes("đội trưởng") || txt.includes("trưởng kíp") || txt.includes("dt")) colMap.dt = j;
-        else if (txt.includes("văn phòng") || txt.includes("vp")) colMap.vp = j;
-        else if (txt.includes("dầu một") || txt.includes("tdm")) colMap.tdm = j;
-        else if (txt.includes("thuận an") || txt.includes("ta")) colMap.ta = j;
-        else if (txt.includes("dĩ an") || txt.includes("da")) colMap.da = j;
-        else if (txt.includes("bến cát") || txt.includes("bc")) colMap.bc = j;
-        else if (txt.includes("tân uyên") || txt.includes("tu")) colMap.tu = j;
-      }
-    } else {
-      headerRowIndex = 0;
-    }
-
+    let startRow = 10; // Dữ liệu bắt đầu từ dòng 11 (index 10)
+    let lastValidDate = "";
     const list = [];
-    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+
+    for (let i = startRow; i < rows.length; i++) {
       const r = rows[i];
       if (!r || !r.c) continue;
 
-      let ngayRaw = getCellRawText(r.c[colMap.ngay]);
-      let caRaw = getCellRawText(r.c[colMap.ca]);
+      let ngayRaw = getCellRawText(r.c[0]);
+      let caRaw = getCellRawText(r.c[1]);
 
-      if (!ngayRaw || !caRaw) continue;
-
-      let ngayFormatted = formatDateString(ngayRaw);
+      // Xử lý ô gộp Ngày (Ca 2, Ca 3 dùng chung ngày của Ca 1 phía trên)
+      if (ngayRaw) {
+        lastValidDate = formatDateString(ngayRaw);
+      }
       let caNum = parseInt(caRaw.replace(/[^0-9]/g, ""), 10);
 
-      if (!ngayFormatted || isNaN(caNum)) continue;
+      if (!lastValidDate || isNaN(caNum)) continue;
+
+      // Đọc các chức danh theo từng cột cụ thể
+      let dieuHanh = getCellRawText(r.c[2]); // Cột C: Điều hành Tổ trực đương ca
+      let truongCa = getCellRawText(r.c[3]); // Cột D: Trưởng ca - Tổ trưởng
+      let phoCa1 = getCellRawText(r.c[4]);   // Cột E: Phó ca
+      let phoCa2 = getCellRawText(r.c[5]);   // Cột F: Phó ca
+      let phuongThuc = getCellRawText(r.c[6]); // Cột G: Trực phương thức
+
+      // Tổng hợp cán bộ lãnh đạo / chỉ huy ca
+      let lanhDaoList = [];
+      if (dieuHanh) lanhDaoList.push(`<b>Điều hành:</b> ${dieuHanh}`);
+      if (truongCa) lanhDaoList.push(`<b>Trưởng ca:</b> ${truongCa}`);
+      let phoCa = [phoCa1, phoCa2].filter(Boolean).join(", ");
+      if (phoCa) lanhDaoList.push(`<b>Phó ca:</b> ${phoCa}`);
+      if (phuongThuc) lanhDaoList.push(`<b>Phương thức:</b> ${phuongThuc}`);
+
+      // Đọc nhân sự các khu vực
+      // Khu vực ĐLTDM (Cột H, I, J, K)
+      let tdmList = [getCellRawText(r.c[7]), getCellRawText(r.c[8]), getCellRawText(r.c[9]), getCellRawText(r.c[10])].filter(Boolean).join(" - ");
+      // Các khu vực tiếp theo
+      let taList = [getCellRawText(r.c[11]), getCellRawText(r.c[12]), getCellRawText(r.c[13]), getCellRawText(r.c[14])].filter(Boolean).join(" - ");
+      let daList = [getCellRawText(r.c[15]), getCellRawText(r.c[16]), getCellRawText(r.c[17]), getCellRawText(r.c[18])].filter(Boolean).join(" - ");
+      let bcList = [getCellRawText(r.c[19]), getCellRawText(r.c[20]), getCellRawText(r.c[21]), getCellRawText(r.c[22])].filter(Boolean).join(" - ");
+      let tuList = [getCellRawText(r.c[23]), getCellRawText(r.c[24]), getCellRawText(r.c[25]), getCellRawText(r.c[26])].filter(Boolean).join(" - ");
 
       list.push({
-        ngay: ngayFormatted,
+        ngay: lastValidDate,
         ca: caNum,
-        tch: getCellRawText(r.c[colMap.tch]),
-        dt: getCellRawText(r.c[colMap.dt]),
-        vp: getCellRawText(r.c[colMap.vp]),
-        tdm: getCellRawText(r.c[colMap.tdm]),
-        ta: getCellRawText(r.c[colMap.ta]),
-        da: getCellRawText(r.c[colMap.da]),
-        bc: getCellRawText(r.c[colMap.bc]),
-        tu: getCellRawText(r.c[colMap.tu])
+        chiHuy: lanhDaoList.join("<br>"),
+        tdm: tdmList,
+        ta: taList,
+        da: daList,
+        bc: bcList,
+        tu: tuList
       });
     }
 
@@ -241,13 +242,6 @@
 
     let newShifts = results.flat().filter(Boolean);
 
-    if (newShifts.length === 0) {
-      const fallbackList = await fetchSheetViaJsonp("");
-      if (fallbackList && fallbackList.length > 0) {
-        newShifts = newShifts.concat(fallbackList);
-      }
-    }
-
     if (newShifts.length > 0) {
       const map = new Map();
       SCHEDULE_DATA.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
@@ -261,7 +255,7 @@
       localStorage.setItem('SCHEDULE_DATA_VHLD_GGSHEET', JSON.stringify(SCHEDULE_DATA));
       updateStatusDisplay();
       traCuuTheoNgay();
-      if (forceAlert) alert(`Đã đồng bộ thành công lịch trực 2 tháng gần nhất!`);
+      if (forceAlert) alert(`Đã đồng bộ thành công lịch trực!`);
     } else if (SCHEDULE_DATA.length === 0) {
       updateStatusDisplay("Chưa tải được dữ liệu (Hãy kiểm tra quyền chia sẻ công khai bảng tính)!", false);
     }
@@ -294,17 +288,15 @@
           <div class="shift-name">${getShiftTimeName(shift.ca)} ${badge}</div>
           <div class="shift-badge">Ngày ${shift.ngay}</div>
         </div>
-        ${shift.tch ? `<div class="row-info"><b>Trực chỉ huy:</b> ${shift.tch}</div>` : ''}
-        ${shift.dt ? `<div class="row-info"><b>Đội trưởng:</b> ${shift.dt}</div>` : ''}
-        ${shift.vp ? `<div class="row-info"><b>Văn phòng:</b> ${shift.vp}</div>` : ''}
+        ${shift.chiHuy ? `<div class="row-info" style="margin-bottom: 8px;">${shift.chiHuy}</div>` : ''}
         <div class="area-block">
-          <div class="area-title">📍 Địa bàn trực vận hành:</div>
+          <div class="area-title">📍 Lực lượng trực các khu vực:</div>
           <div class="area-detail">
-            ${shift.tdm ? `• <b>Thủ Dầu Một:</b> ${shift.tdm}<br>` : ''}
-            ${shift.ta ? `• <b>Thuận An:</b> ${shift.ta}<br>` : ''}
-            ${shift.da ? `• <b>Dĩ An:</b> ${shift.da}<br>` : ''}
-            ${shift.bc ? `• <b>Bến Cát:</b> ${shift.bc}<br>` : ''}
-            ${shift.tu ? `• <b>Tân Uyên:</b> ${shift.tu}` : ''}
+            ${shift.tdm ? `• <b>Khu vực ĐLTDM:</b> ${shift.tdm}<br>` : ''}
+            ${shift.ta ? `• <b>Khu vực Thuận An:</b> ${shift.ta}<br>` : ''}
+            ${shift.da ? `• <b>Khu vực Dĩ An:</b> ${shift.da}<br>` : ''}
+            ${shift.bc ? `• <b>Khu vực Bến Cát:</b> ${shift.bc}<br>` : ''}
+            ${shift.tu ? `• <b>Khu vực Tân Uyên:</b> ${shift.tu}` : ''}
           </div>
         </div>
       </div>
