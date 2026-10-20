@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kíp Trực Đội VHLĐ</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
     body { background: #f0f2f5; margin: 0; padding: 12px; }
@@ -76,7 +75,6 @@
 <script>
   const SPREADSHEET_ID = "1gMvdL68000s151O2a6J9g9n1w3yK_7n-l2zUe4lq-7k";
 
-  // Chỉ lấy tháng này và tháng tiếp theo
   function getActiveSheetNames() {
     const now = new Date();
     const curMonth = now.getMonth() + 1;
@@ -125,7 +123,41 @@
     });
   }
 
-  // Quét toàn diện theo giá trị hiển thị f hoặc v
+  function getCellRawText(cell) {
+    if (!cell) return "";
+    if (cell.f !== undefined && cell.f !== null) return String(cell.f).trim();
+    if (cell.v !== undefined && cell.v !== null) {
+      if (typeof cell.v === "string" && cell.v.startsWith("Date(")) {
+        const parts = cell.v.match(/\d+/g);
+        if (parts && parts.length >= 3) {
+          const y = parts[0];
+          const m = String(parseInt(parts[1], 10) + 1).padStart(2, '0');
+          const d = String(parts[2]).padStart(2, '0');
+          return `${y}-${m}-${d}`;
+        }
+      }
+      return String(cell.v).trim();
+    }
+    return "";
+  }
+
+  function formatDateString(str) {
+    if (!str) return "";
+    str = str.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+    const parts = str.split(/[/.-]/);
+    if (parts.length === 3) {
+      let d = parts[0].padStart(2, '0');
+      let m = parts[1].padStart(2, '0');
+      let y = parts[2];
+      if (y.length === 2) y = "20" + y;
+      if (parseInt(d, 10) > 1900) return `${d}-${m}-${y}`;
+      return `${y}-${m}-${d}`;
+    }
+    return "";
+  }
+
   function parseGvizTable(table) {
     const rows = table.rows;
     if (!rows || rows.length === 0) return [];
@@ -195,41 +227,6 @@
     }
 
     return list;
-  }
-
-  function getCellRawText(cell) {
-    if (!cell) return "";
-    if (cell.f !== undefined && cell.f !== null) return String(cell.f).trim();
-    if (cell.v !== undefined && cell.v !== null) {
-      if (typeof cell.v === "string" && cell.v.startsWith("Date(")) {
-        const parts = cell.v.match(/\d+/g);
-        if (parts && parts.length >= 3) {
-          const y = parts[0];
-          const m = String(parseInt(parts[1], 10) + 1).padStart(2, '0');
-          const d = String(parts[2]).padStart(2, '0');
-          return `${y}-${m}-${d}`;
-        }
-      }
-      return String(cell.v).trim();
-    }
-    return "";
-  }
-
-  function formatDateString(str) {
-    if (!str) return "";
-    str = str.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-
-    const parts = str.split(/[/.-]/);
-    if (parts.length === 3) {
-      let d = parts[0].padStart(2, '0');
-      let m = parts[1].padStart(2, '0');
-      let y = parts[2];
-      if (y.length === 2) y = "20" + y;
-      if (parseInt(d, 10) > 1900) return `${d}-${m}-${y}`;
-      return `${y}-${m}-${d}`;
-    }
-    return "";
   }
 
   async function syncAllMonths(forceAlert = false) {
