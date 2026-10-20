@@ -1,518 +1,412 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kíp Trực Đội VHLĐ</title>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-        body { background: #f0f2f5; margin: 0; padding: 12px; }
-        .app-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .header-title { text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-        .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-now { background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }
-        .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }
-        .btn-tomorrow { background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }
-        .separator { text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }
-        .separator::before, .separator::after { content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }
-        .separator::before { left: 0; }
-        .separator::after { right: 0; }
-        
-        .search-box { display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }
-        .search-box input[type="date"] { flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }
-        .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
-        .btn-step:hover { background: #343a40; }
-        .btn-step-next { background: #0b5394; }
-        .btn-step-next:hover { background: #083c6c; }
-
-        .card-shift { background: #fff; border: 1px solid #ced4da; border-left: 5px solid #0b5394; border-radius: 8px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .card-shift-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px; }
-        .shift-name { font-weight: bold; font-size: 1.05rem; color: #0b5394; }
-        .shift-badge { background: #fd7e14; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
-        .row-info { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }
-        
-        .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
-        .area-title { font-weight: 700; color: #0b5394; font-size: 0.92rem; margin-bottom: 5px; }
-        .pair-row { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; }
-        .pair-item { display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
-        .pair-label { font-weight: 600; color: #495057; min-width: 52px; }
-        .pair-val { color: #212529; }
-        
-        .sync-box { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #dee2e6; text-align: center; font-size: 0.85rem; }
-        .btn-sync { background: #0d6efd; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-sync:hover { background: #0b5ed7; }
-        .status-msg { margin-top: 8px; font-weight: 600; }
-        .footer-note { text-align: center; font-size: 0.78rem; color: #6c757d; margin-top: 15px; line-height: 1.4; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kíp Trực Đội VHLĐ</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: #f0f2f5; margin: 0; padding: 12px; }
+    .app-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .header-title { text-align: center; color: #0b5394; font-size: 1.25rem; font-weight: bold; margin: 6px 0 16px 0; }
+    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .btn { width: 100%; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-now { background: #198754; box-shadow: 0 2px 6px rgba(25,135,84,0.3); }
+    .btn-today { background: #0b5ed7; box-shadow: 0 2px 6px rgba(11,94,215,0.3); }
+    .btn-tomorrow { background: #6f42c1; box-shadow: 0 2px 6px rgba(111,66,193,0.3); }
+    .separator { text-align: center; position: relative; margin: 18px 0; color: #6c757d; font-size: 0.85rem; }
+    .separator::before, .separator::after { content: ""; position: absolute; top: 50%; width: 26%; height: 1px; background: #dee2e6; }
+    .separator::before { left: 0; }
+    .separator::after { right: 0; }
+    .search-box { display: flex; gap: 6px; margin-bottom: 16px; align-items: stretch; }
+    .search-box input[type="date"] { flex: 1.5; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.95rem; text-align: center; }
+    .btn-step { flex: 1; background: #495057; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 10px 4px; transition: background 0.15s; }
+    .btn-step:hover { background: #343a40; }
+    .btn-step-next { background: #0b5394; }
+    .btn-step-next:hover { background: #083c6c; }
+    .card-shift { background: #fff; border: 1px solid #ced4da; border-left: 5px solid #0b5394; border-radius: 8px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card-shift-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; margin-bottom: 10px; }
+    .shift-name { font-weight: bold; font-size: 1.05rem; color: #0b5394; }
+    .shift-badge { background: #fd7e14; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+    .row-info { margin-bottom: 6px; font-size: 0.92rem; line-height: 1.45; color: #212529; }
+    .area-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
+    .area-title { font-weight: bold; color: #495057; margin-bottom: 4px; font-size: 0.88rem; }
+    .area-detail { color: #212529; font-size: 0.9rem; }
+    .text-nowrap { white-space: nowrap; }
+    .footer-action { margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 12px; text-align: center; }
+    .btn-sync { background: #6c757d; border: none; border-radius: 6px; color: #fff; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .btn-sync:hover { background: #5a6268; }
+    .status-text { font-size: 0.8rem; color: #6c757d; margin-top: 6px; }
+    .tag-hot { background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px; }
+  </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="header-title">⚡ TRA CỨU KÍP TRỰC ĐỘI VHLĐ</div>
+  <div class="header-title">KÍP TRỰC ĐỘI VHLĐ BÌNH DƯƠNG</div>
+  
+  <div class="btn-group">
+    <button class="btn btn-now" onclick="traCuuHienTai()">
+      ⚡ CA ĐANG TRỰC HIỆN TẠI
+    </button>
+    <button class="btn btn-today" onclick="traCuuHomNay()">
+      📅 Xem Toàn Bộ Hôm Nay
+    </button>
+    <button class="btn btn-tomorrow" onclick="traCuuNgayMai()">
+      ⏩ Xem Toàn Bộ Ngày Mai
+    </button>
+  </div>
 
-    <div class="btn-group">
-        <button type="button" class="btn btn-now" onclick="traCuuHienTai()">🕒 AI ĐANG TRỰC BÂY GIỜ?</button>
-        <button type="button" class="btn btn-today" onclick="traCuuHomNay()">📅 AI TRỰC HÔM NAY?</button>
-        <button type="button" class="btn btn-tomorrow" onclick="traCuuNgayMai()">📆 AI TRỰC NGÀY MAI?</button>
-    </div>
+  <div class="separator">HOẶC CHỌN NGÀY TÙY Ý</div>
 
-    <div class="separator">HOẶC CHỌN NGÀY BẤT KỲ</div>
+  <div class="search-box">
+    <button class="btn-step" onclick="thayDoiNgay(-1)">◀ Ngày trước</button>
+    <input type="date" id="selectedDate" onchange="traCuuTheoNgay()">
+    <button class="btn-step btn-step-next" onclick="thayDoiNgay(1)">Ngày sau ▶</button>
+  </div>
 
-    <div class="search-box">
-        <button type="button" class="btn-step" onclick="chuyenNgay(-1)" title="Lùi 1 ngày">◀ Ngày trước</button>
-        <input type="date" id="inputDate" onchange="traCuuTheoNgay()">
-        <button type="button" class="btn-step btn-step-next" onclick="chuyenNgay(1)" title="Tiến 1 ngày">Ngày sau ▶</button>
-    </div>
+  <div id="resultsContainer"></div>
 
-    <div id="outputArea"></div>
-
-    <div class="footer-note">
-        Dữ liệu nguồn: Lịch trực Đội VHLĐ<br>
-        <i>* Ký hiệu: <b>(TN)</b>: Trưởng nhóm | <b>🚗</b>: Kiêm lái xe</i>
-    </div>
-
-    <div class="sync-box">
-        <button type="button" class="btn-sync" onclick="syncAllMonths(true)">🔄 Cập nhật lịch trực </button>
-        <div id="syncStatus" class="status-msg"></div>
-    </div>
+  <div class="footer-action">
+    <button class="btn-sync" onclick="syncAllMonths(true)">🔄 Cập nhật từ Google Sheets</button>
+    <div class="status-text" id="syncStatus">Đang kiểm tra dữ liệu...</div>
+  </div>
 </div>
 
 <script>
-const SPREADSHEET_ID = "14recmpDN6yMTTyvqJvi8B1WlsxnR6aBBHdZLWnaSIz4";
-const SHEET_NAMES = [
-    "Thang_10", "Thang_09", "Thang_11", "Thang_12", 
-    "Thang_01", "Thang_02", "Thang_03", "Thang_04", 
-    "Thang_05", "Thang_06", "Thang_07", "Thang_08", "Lich_truc"
-];
+  // ID Google Spreadsheet
+  const SPREADSHEET_ID = "1gMvdL68000s151O2a6J9g9n1w3yK_7n-l2zUe4lq-7k";
 
-let SCHEDULE_DATA = [];
+  // Hàm lấy động sheet của tháng hiện tại và tháng kế tiếp
+  function getActiveSheetNames() {
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const nextMonth = curMonth === 12 ? 1 : curMonth + 1;
+    
+    const curSheet = "Thang_" + String(curMonth).padStart(2, '0');
+    const nextSheet = "Thang_" + String(nextMonth).padStart(2, '0');
+    
+    return [curSheet, nextSheet];
+  }
 
-function standardizeSchedule(list) {
-    if (!list || list.length === 0) return [];
-    const grouped = {};
-    list.forEach(item => {
-        if (!grouped[item.ngay]) grouped[item.ngay] = [];
-        grouped[item.ngay].push(item);
-    });
+  let SCHEDULE_DATA = [];
 
-    const result = [];
-    Object.keys(grouped).forEach(ngay => {
-        const shifts = grouped[ngay];
-        const ca2 = shifts.find(x => (x.origCa === 2 || x.ca === 2));
-        const hasCa2Content = ca2 && (
-            (ca2.dieu_hanh && ca2.dieu_hanh !== "---" && ca2.dieu_hanh.trim() !== "") ||
-            (ca2.tdm1 && ca2.tdm1 !== "---") ||
-            (ca2.tt1 && ca2.tt1 !== "---") ||
-            (ca2.tu1 && ca2.tu1 !== "---")
-        );
+  // Tải bảng tính qua JSONP Google Visualization API
+  function fetchSheetViaJsonp(sheetName) {
+    return new Promise((resolve) => {
+      const callbackName = "gvizCallback_" + Math.floor(Math.random() * 1000000);
+      const script = document.createElement("script");
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${callbackName}${sheetName ? '&sheet=' + encodeURIComponent(sheetName) : ''}`;
 
-        const isTwoShiftDay = !hasCa2Content;
+      const timeout = setTimeout(() => {
+        cleanup();
+        resolve(null);
+      }, 5000);
 
-        if (isTwoShiftDay) {
-            shifts.forEach(s => {
-                const caIdx = s.origCa || s.ca;
-                if (caIdx === 1) {
-                    s.ca = 1;
-                    s.gio = "06h00 - 18h00";
-                    result.push(s);
-                } else if (caIdx === 3 || caIdx === 2) {
-                    s.ca = 2;
-                    s.gio = "18h00 - 06h00";
-                    result.push(s);
-                }
-            });
-        } else {
-            shifts.forEach(s => {
-                const caIdx = s.origCa || s.ca;
-                s.ca = caIdx;
-                s.gio = (s.ca === 1) ? "06h00 - 14h00" : (s.ca === 2) ? "14h00 - 22h00" : "22h00 - 06h00";
-                result.push(s);
-            });
+      function cleanup() {
+        if (script.parentNode) script.parentNode.removeChild(script);
+        delete window[callbackName];
+        clearTimeout(timeout);
+      }
+
+      window[callbackName] = function(json) {
+        cleanup();
+        if (!json || !json.table) {
+          resolve(null);
+          return;
         }
+        resolve(parseGvizTable(json.table));
+      };
+
+      script.onerror = function() {
+        cleanup();
+        resolve(null);
+      };
+
+      script.src = url;
+      document.body.appendChild(script);
     });
+  }
 
-    return result.sort((a,b) => {
-        if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
-        return a.ca - b.ca;
-    });
-}
+  // Phân tích dữ liệu bảng tính
+  function parseGvizTable(table) {
+    const rows = table.rows;
+    if (!rows || rows.length === 0) return [];
 
-function formatDateStr(dStr) {
-    if (!dStr) return "";
-    const p = dStr.split('-');
-    return `${p[2]}/${p[1]}/${p[0]}`;
-}
+    let headerRowIndex = -1;
+    let colMap = {};
 
-function updateStatusDisplay(msg, isSuccess) {
-    const statusEl = document.getElementById('syncStatus');
-    if (msg) {
-        statusEl.innerHTML = `<span style="color:${isSuccess ? '#198754' : '#dc3545'}">${msg}</span>`;
-        return;
-    }
-    if (SCHEDULE_DATA.length > 0) {
-        const dates = Array.from(new Set(SCHEDULE_DATA.map(x => x.ngay))).sort();
-        const fromDate = formatDateStr(dates[0]);
-        const toDate = formatDateStr(dates[dates.length - 1]);
-        statusEl.innerHTML = `<span style="color:#198754">✓ Đã đồng bộ ${SCHEDULE_DATA.length} ca trực (${fromDate} ➔ ${toDate})</span>`;
-    }
-}
-
-function formatWorker(name, driverStr) {
-    if (!name) return "";
-    name = String(name).trim().replace(/\n/g, ' ');
-    if (!name) return "";
-    if (driverStr) {
-        const cleanDrv = driverStr.toLowerCase();
-        const shortName = name.replace(/\(.*\)/g, '').trim().toLowerCase();
-        if (shortName && cleanDrv.includes(shortName)) {
-            return name + " 🚗";
+    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+      const r = rows[i];
+      if (!r || !r.c) continue;
+      for (let j = 0; j < r.c.length; j++) {
+        const val = r.c[j] ? String(r.c[j].v || "").toLowerCase().trim() : "";
+        if (val.includes("ngày") || val.includes("ngay")) {
+          headerRowIndex = i;
+          break;
         }
+      }
+      if (headerRowIndex !== -1) break;
     }
-    return name;
-}
 
-function formatPair(list) {
-    const valid = list.filter(x => x && x.trim() !== "");
-    return valid.length > 0 ? valid.join(" - ") : "---";
-}
+    if (headerRowIndex === -1) headerRowIndex = 0;
 
-// Bóc tách ngày tháng chuẩn xác tuyệt đối từ dữ liệu Google Sheets
-function parseCellDate(cell) {
+    const headerRow = rows[headerRowIndex];
+    for (let j = 0; j < headerRow.c.length; j++) {
+      const cell = headerRow.c[j];
+      const val = cell ? String(cell.v || "").toLowerCase().trim() : "";
+      if (val.includes("ngày") || val.includes("ngay")) colMap.ngay = j;
+      else if (val.includes("ca")) colMap.ca = j;
+      else if (val.includes("trực chỉ huy") || val.includes("tch") || val.includes("chỉ huy")) colMap.tch = j;
+      else if (val.includes("đội trưởng") || val.includes("dt") || val.includes("trưởng kíp")) colMap.dt = j;
+      else if (val.includes("văn phòng") || val.includes("vp")) colMap.vp = j;
+      else if (val.includes("thủ dầu một") || val.includes("tdm")) colMap.tdm = j;
+      else if (val.includes("thuận an") || val.includes("ta")) colMap.ta = j;
+      else if (val.includes("dĩ an") || val.includes("da")) colMap.da = j;
+      else if (val.includes("bến cát") || val.includes("bc")) colMap.bc = j;
+      else if (val.includes("tân uyên") || val.includes("tu")) colMap.tu = j;
+    }
+
+    if (colMap.ngay === undefined) colMap.ngay = 0;
+    if (colMap.ca === undefined) colMap.ca = 1;
+
+    const list = [];
+    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || !r.c) continue;
+
+      let ngayRaw = getCellValue(r.c[colMap.ngay]);
+      let caRaw = getCellValue(r.c[colMap.ca]);
+
+      if (!ngayRaw || !caRaw) continue;
+
+      let ngayFormatted = formatDateString(ngayRaw);
+      let caNum = parseInt(String(caRaw).replace(/[^0-9]/g, ""), 10);
+
+      if (!ngayFormatted || isNaN(caNum)) continue;
+
+      list.push({
+        ngay: ngayFormatted,
+        ca: caNum,
+        tch: getCellValue(r.c[colMap.tch]),
+        dt: getCellValue(r.c[colMap.dt]),
+        vp: getCellValue(r.c[colMap.vp]),
+        tdm: getCellValue(r.c[colMap.tdm]),
+        ta: getCellValue(r.c[colMap.ta]),
+        da: getCellValue(r.c[colMap.da]),
+        bc: getCellValue(r.c[colMap.bc]),
+        tu: getCellValue(r.c[colMap.tu])
+      });
+    }
+
+    return list;
+  }
+
+  function getCellValue(cell) {
     if (!cell) return "";
-    // Trường hợp 1: Google Sheets trả về Date object trong cell.v: "Date(2026, 9, 7)"
-    const rawVal = String(cell.v || "");
-    const dateMatch = rawVal.match(/Date\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (dateMatch) {
-        const y = dateMatch[1];
-        const m = String(Number(dateMatch[2]) + 1).padStart(2, '0');
-        const d = String(dateMatch[3]).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
-    // Trường hợp 2: Dạng chuỗi hiển thị cell.f hoặc cell.v (ví dụ: "7/10/2026" hoặc "07/10/2026")
-    const str = String(cell.f || cell.v || "").trim();
-    if (str.includes('/')) {
-        const p = str.split('/');
-        if (p.length === 3) {
-            const y = (p[2].length === 2) ? "20" + p[2] : p[2];
-            // Định dạng ngày trong Excel Việt Nam luôn là Ngày/Tháng/Năm (D/M/YYYY)
-            const d = String(p[0]).padStart(2, '0');
-            const m = String(p[1]).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+    if (cell.f) return String(cell.f).trim();
+    if (cell.v !== null && cell.v !== undefined) {
+      if (typeof cell.v === "string" && cell.v.startsWith("Date(")) {
+        const parts = cell.v.match(/\d+/g);
+        if (parts && parts.length >= 3) {
+          const y = parts[0];
+          const m = String(parseInt(parts[1], 10) + 1).padStart(2, '0');
+          const d = String(parts[2]).padStart(2, '0');
+          return `${y}-${m}-${d}`;
         }
-    } else if (str.includes('-')) {
-        return str.substring(0, 10);
+      }
+      return String(cell.v).trim();
     }
     return "";
-}
+  }
 
-function parseWorkbookGvizRows(rows) {
-    const rawShifts = [];
-    let lastDateStr = "";
+  function formatDateString(str) {
+    if (!str) return "";
+    str = str.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
 
-    for (let r = 0; r < rows.length; r++) {
-        const row = rows[r];
-        if (!row || !row.c) continue;
+    const parts = str.split(/[/.-]/);
+    if (parts.length === 3) {
+      let d = parts[0].padStart(2, '0');
+      let m = parts[1].padStart(2, '0');
+      let y = parts[2];
+      if (y.length === 2) y = "20" + y;
+      if (parseInt(d, 10) > 1900) return `${d}-${m}-${y}`;
+      return `${y}-${m}-${d}`;
+    }
+    return "";
+  }
 
-        const caCell = row.c[1];
-        const caVal = caCell ? (caCell.v || "") : "";
-        if (caVal === "" || isNaN(Number(caVal))) continue;
-        const caNum = Number(caVal);
-        if (![1, 2, 3].includes(caNum)) continue;
-
-        const dateCell = row.c[0];
-        const parsedDate = parseCellDate(dateCell);
-        if (parsedDate) {
-            lastDateStr = parsedDate;
-        }
-
-        if (!lastDateStr) continue;
-
-        function getCellText(idx) {
-            const c = row.c[idx];
-            return c ? String(c.f || c.v || "").trim() : "";
-        }
-
-        const dieuHanhStr = (getCellText(2) || getCellText(3)).replace(/\n/g, ' ').trim();
-        const phoCaStr = [getCellText(4), getCellText(5)].filter(x => x && x !== "").join(" | ");
-        const phuongThucStr = getCellText(6);
-
-        const lx_tdm = getCellText(12);
-        const tdm1 = formatPair([formatWorker(getCellText(7), lx_tdm), formatWorker(getCellText(8), lx_tdm)]);
-        const tdm2 = formatPair([formatWorker(getCellText(9), lx_tdm), formatWorker(getCellText(10), lx_tdm), formatWorker(getCellText(11), lx_tdm)]);
-
-        const lx_tt = getCellText(18);
-        const tt1 = formatPair([formatWorker(getCellText(13), lx_tt), formatWorker(getCellText(14), lx_tt)]);
-        const tt2 = formatPair([formatWorker(getCellText(15), lx_tt), formatWorker(getCellText(16), lx_tt), formatWorker(getCellText(17), lx_tt)]);
-
-        const lx_tu = getCellText(24);
-        const tu1 = formatPair([formatWorker(getCellText(19), lx_tu), formatWorker(getCellText(20), lx_tu)]);
-        const tu2 = formatPair([formatWorker(getCellText(21), lx_tu), formatWorker(getCellText(22), lx_tu), formatWorker(getCellText(23), lx_tu)]);
-
-        rawShifts.push({
-            ngay: lastDateStr,
-            origCa: caNum,
-            ca: caNum,
-            to: getCellText(25) || `Tổ VHLĐ`,
-            dieu_hanh: dieuHanhStr,
-            pho_ca: phoCaStr || "---",
-            phuong_thuc: phuongThucStr || "---",
-            tdm1: tdm1,
-            tdm2: tdm2,
-            tt1: tt1,
-            tt2: tt2,
-            tu1: tu1,
-            tu2: tu2
-        });
+  // Đồng bộ tháng hiện tại và tháng kế tiếp qua Promise.all
+  async function syncAllMonths(forceAlert = false) {
+    if (forceAlert || SCHEDULE_DATA.length === 0) {
+      updateStatusDisplay("Đang đồng bộ dữ liệu từ Google Sheets...", true);
     }
 
-    return standardizeSchedule(rawShifts);
-}
+    const sheetsToSync = getActiveSheetNames();
+    const results = await Promise.all(
+      sheetsToSync.map(name => fetchSheetViaJsonp(name))
+    );
 
-function fetchSheetViaJsonp(sheetName) {
-    return new Promise((resolve) => {
-        const callbackName = 'gvizCallback_' + Math.floor(Math.random() * 1000000);
-        const script = document.createElement('script');
-        
-        const timeout = setTimeout(() => {
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-            resolve([]);
-        }, 6000);
+    let newShifts = results.flat().filter(Boolean);
 
-        window[callbackName] = function(json) {
-            clearTimeout(timeout);
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-            
-            if (!json || !json.table || !json.table.rows) {
-                resolve([]);
-                return;
-            }
-
-            resolve(parseWorkbookGvizRows(json.table.rows));
-        };
-
-        script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=responseHandler:${callbackName}&t=${Date.now()}`;
-        script.onerror = function() {
-            clearTimeout(timeout);
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-            resolve([]);
-        };
-        document.body.appendChild(script);
-    });
-}
-
-async function syncAllMonths(forceAlert = false) {
-    updateStatusDisplay("Đang đồng bộ dữ liệu từ Google Sheets...", true);
-    
-    let allShifts = [];
-    for (const name of SHEET_NAMES) {
-        const list = await fetchSheetViaJsonp(name);
-        if (list && list.length > 0) {
-            allShifts = allShifts.concat(list);
-        }
+    if (newShifts.length === 0) {
+      const fallbackList = await fetchSheetViaJsonp("");
+      if (fallbackList && fallbackList.length > 0) {
+        newShifts = newShifts.concat(fallbackList);
+      }
     }
 
-    if (allShifts.length === 0) {
-        const list = await fetchSheetViaJsonp("");
-        if (list && list.length > 0) {
-            allShifts = allShifts.concat(list);
-        }
+    if (newShifts.length > 0) {
+      const map = new Map();
+      SCHEDULE_DATA.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
+      newShifts.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
+
+      SCHEDULE_DATA = Array.from(map.values()).sort((a, b) => {
+        if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
+        return a.ca - b.ca;
+      });
+
+      localStorage.setItem('SCHEDULE_DATA_VHLD_GGSHEET', JSON.stringify(SCHEDULE_DATA));
+      updateStatusDisplay();
+      traCuuTheoNgay();
+      if (forceAlert) alert(`Đã đồng bộ thành công lịch trực 2 tháng gần nhất!`);
+    } else if (SCHEDULE_DATA.length === 0) {
+      updateStatusDisplay("Chưa tải được dữ liệu (Hãy kiểm tra quyền chia sẻ công khai bảng tính)!", false);
     }
+  }
 
-    if (allShifts.length > 0) {
-        const map = new Map();
-        allShifts.forEach(item => map.set(`${item.ngay}_${item.ca}`, item));
-        SCHEDULE_DATA = Array.from(map.values()).sort((a,b) => {
-            if (a.ngay !== b.ngay) return a.ngay.localeCompare(b.ngay);
-            return a.ca - b.ca;
-        });
-
-        localStorage.setItem('SCHEDULE_DATA_VHLD_GGSHEET', JSON.stringify(SCHEDULE_DATA));
-        updateStatusDisplay();
-        traCuuTheoNgay();
-        if (forceAlert) alert(`Đã đồng bộ thành công ${SCHEDULE_DATA.length} ca trực các tháng!`);
+  function updateStatusDisplay(msg, isSyncing = false) {
+    const el = document.getElementById("syncStatus");
+    if (!el) return;
+    if (msg) {
+      el.textContent = msg;
+      el.style.color = isSyncing ? "#0b5ed7" : "#dc3545";
     } else {
-        updateStatusDisplay("Chưa tải được dữ liệu (Hãy kiểm tra quyền chia sẻ công khai bảng tính)!", false);
+      el.innerHTML = `✓ Dữ liệu sẵn sàng: <b>${SCHEDULE_DATA.length}</b> ca trực (Tháng này & Tháng tới)`;
+      el.style.color = "#198754";
     }
-}
+  }
 
-function getCurrentShift(now) {
-    const totalMinutes = now.getHours() * 60 + now.getMinutes();
-    
-    function formatDate(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return { dateStr: `${y}-${m}-${day}`, displayDate: `${day}/${m}/${y}` };
+  function getShiftTimeName(ca) {
+    if (ca === 1) return "Ca 1 (00:00 - 08:00)";
+    if (ca === 2) return "Ca 2 (08:00 - 16:00)";
+    if (ca === 3) return "Ca 3 (16:00 - 24:00)";
+    return `Ca ${ca}`;
+  }
+
+  function renderShiftCard(shift, isCurrent = false) {
+    const badge = isCurrent ? '<span class="tag-hot">ĐANG TRỰC</span>' : '';
+    return `
+      <div class="card-shift" style="${isCurrent ? 'border-left-color: #198754; background: #fafffb;' : ''}">
+        <div class="card-shift-header">
+          <div class="shift-name">${getShiftTimeName(shift.ca)} ${badge}</div>
+          <div class="shift-badge">Ngày ${shift.ngay}</div>
+        </div>
+        ${shift.tch ? `<div class="row-info"><b>Trực chỉ huy:</b> ${shift.tch}</div>` : ''}
+        ${shift.dt ? `<div class="row-info"><b>Đội trưởng:</b> ${shift.dt}</div>` : ''}
+        ${shift.vp ? `<div class="row-info"><b>Văn phòng:</b> ${shift.vp}</div>` : ''}
+        <div class="area-block">
+          <div class="area-title">📍 Địa bàn trực vận hành:</div>
+          <div class="area-detail">
+            ${shift.tdm ? `• <b>Thủ Dầu Một:</b> ${shift.tdm}<br>` : ''}
+            ${shift.ta ? `• <b>Thuận An:</b> ${shift.ta}<br>` : ''}
+            ${shift.da ? `• <b>Dĩ An:</b> ${shift.da}<br>` : ''}
+            ${shift.bc ? `• <b>Bến Cát:</b> ${shift.bc}<br>` : ''}
+            ${shift.tu ? `• <b>Tân Uyên:</b> ${shift.tu}` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function formatDateISO(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function traCuuTheoNgay() {
+    const dateInput = document.getElementById("selectedDate");
+    const container = document.getElementById("resultsContainer");
+    if (!dateInput.value) return;
+
+    const targetDate = dateInput.value;
+    const matches = SCHEDULE_DATA.filter(item => item.ngay === targetDate);
+
+    if (matches.length === 0) {
+      container.innerHTML = `<div style="text-align: center; color: #6c757d; padding: 25px 0;">Không có thông tin lịch trực cho ngày <b>${targetDate}</b>.<br><small>(Dữ liệu tự động chỉ gồm tháng hiện tại và tháng tới)</small></div>`;
+      return;
     }
 
-    const todayInfo = formatDate(now);
-    const dayShifts = SCHEDULE_DATA.filter(x => x.ngay === todayInfo.dateStr);
-    const isTwoShiftDay = (dayShifts.length > 0 && dayShifts.length <= 2 && dayShifts.some(x => x.gio.includes("18h00")));
-
-    let ca = 1;
-    let target = new Date(now);
-
-    if (isTwoShiftDay) {
-        if (totalMinutes >= 360 && totalMinutes < 1080) {
-            ca = 1;
-        } else {
-            ca = 2;
-            if (totalMinutes < 360) target.setDate(target.getDate() - 1);
-        }
-    } else {
-        if (totalMinutes >= 360 && totalMinutes < 840) {
-            ca = 1;
-        } else if (totalMinutes >= 840 && totalMinutes < 1320) {
-            ca = 2;
-        } else {
-            ca = 3;
-            if (totalMinutes < 360) target.setDate(target.getDate() - 1);
-        }
-    }
-
-    const res = formatDate(target);
-    return { dateStr: res.dateStr, displayDate: res.displayDate, ca: ca };
-}
-
-function renderShifts(shifts, titleText) {
-    const out = document.getElementById('outputArea');
-    if (!shifts || shifts.length === 0) {
-        out.innerHTML = `<div style="color: #dc3545; text-align: center; padding: 15px; font-weight: bold;">Chưa có dữ liệu cho thời điểm này!</div>`;
-        return;
-    }
-
-    let html = `<div style="font-weight: bold; color: #495057; margin-bottom: 10px; font-size: 0.95rem;">${titleText}</div>`;
-    shifts.forEach(s => {
-        html += `
-            <div class="card-shift">
-                <div class="card-shift-header">
-                    <div>
-                        <span class="shift-name">CA ${s.ca}</span>
-                        <span style="font-size: 0.85rem; color: #6c757d; margin-left: 5px;">(${s.gio})</span>
-                    </div>
-                    <span class="shift-badge">${s.to}</span>
-                </div>
-                <div class="row-info"><b>👤 Điều hành:</b> ${s.dieu_hanh}</div>
-                <div class="row-info"><b>🔹 Phó ca:</b> ${s.pho_ca}</div>
-                <div class="row-info"><b>⚡ Phương thức:</b> ${s.phuong_thuc}</div>
-                
-                <div class="area-block">
-                    <div class="area-title">📍 Khu vực ĐLTDM:</div>
-                    <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tdm1}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tdm2}</span></div>
-                    </div>
-                </div>
-
-                <div class="area-block">
-                    <div class="area-title">📍 Khu vực ĐLTT:</div>
-                    <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tt1}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tt2}</span></div>
-                    </div>
-                </div>
-
-                <div class="area-block">
-                    <div class="area-title">📍 Khu vực ĐLTU, BTU:</div>
-                    <div class="pair-row">
-                        <div class="pair-item"><span class="pair-label">Cặp 1:</span><span class="pair-val">${s.tu1}</span></div>
-                        <div class="pair-item"><span class="pair-label">Cặp 2:</span><span class="pair-val">${s.tu2}</span></div>
-                    </div>
-                </div>
-            </div>
-        `;
+    matches.sort((a, b) => a.ca - b.ca);
+    let html = "";
+    matches.forEach(shift => {
+      html += renderShiftCard(shift, false);
     });
-    out.innerHTML = html;
-}
+    container.innerHTML = html;
+  }
 
-function traCuuHienTai() {
-    const now = new Date();
-    const cur = getCurrentShift(now);
-    const item = SCHEDULE_DATA.find(x => x.ngay === cur.dateStr && x.ca === cur.ca);
-    renderShifts(item ? [item] : [], `📌 ĐANG TRỰC HIỆN TẠI (CA ${cur.ca} - ${cur.displayDate})`);
-}
-
-function traCuuHomNay() {
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    const dateStr = `${y}-${m}-${d}`;
-    const displayDate = `${d}/${m}/${y}`;
-
-    document.getElementById('inputDate').value = dateStr;
-    const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📅 TOÀN BỘ KÍP TRỰC HÔM NAY (${displayDate})`);
-}
-
-function traCuuNgayMai() {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const y = tomorrow.getFullYear();
-    const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
-    const d = String(tomorrow.getDate()).padStart(2, '0');
-    const dateStr = `${y}-${m}-${d}`;
-    const displayDate = `${d}/${m}/${y}`;
-
-    document.getElementById('inputDate').value = dateStr;
-    const items = SCHEDULE_DATA.filter(x => x.ngay === dateStr).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📆 TOÀN BỘ KÍP TRỰC NGÀY MAI (${displayDate})`);
-}
-
-function chuyenNgay(offset) {
-    const el = document.getElementById('inputDate');
-    if (!el.value) return;
-    const parts = el.value.split('-');
-    const cur = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    cur.setDate(cur.getDate() + offset);
-    const y = cur.getFullYear();
-    const m = String(cur.getMonth() + 1).padStart(2, '0');
-    const d = String(cur.getDate()).padStart(2, '0');
-    el.value = `${y}-${m}-${d}`;
+  function thayDoiNgay(days) {
+    const dateInput = document.getElementById("selectedDate");
+    const cur = dateInput.value ? new Date(dateInput.value) : new Date();
+    cur.setDate(cur.getDate() + days);
+    dateInput.value = formatDateISO(cur);
     traCuuTheoNgay();
-}
+  }
 
-function traCuuTheoNgay() {
-    const val = document.getElementById('inputDate').value;
-    if (!val) return;
-    const parts = val.split('-');
-    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-    const items = SCHEDULE_DATA.filter(x => x.ngay === val).sort((a,b) => a.ca - b.ca);
-    renderShifts(items, `📋 KÍP TRỰC NGÀY ${displayDate}`);
-}
+  function traCuuHomNay() {
+    document.getElementById("selectedDate").value = formatDateISO(new Date());
+    traCuuTheoNgay();
+  }
 
-(async function init() {
-    const today = new Date();
-    const yInit = today.getFullYear();
-    const mInit = String(today.getMonth() + 1).padStart(2, '0');
-    const dInit = String(today.getDate()).padStart(2, '0');
-    document.getElementById('inputDate').value = `${yInit}-${mInit}-${dInit}`;
+  function traCuuNgayMai() {
+    const next = new Date();
+    next.setDate(next.getDate() + 1);
+    document.getElementById("selectedDate").value = formatDateISO(next);
+    traCuuTheoNgay();
+  }
+
+  function traCuuHienTai() {
+    const now = new Date();
+    const todayStr = formatDateISO(now);
+    const hour = now.getHours();
+
+    let curCa = 1;
+    if (hour >= 0 && hour < 8) curCa = 1;
+    else if (hour >= 8 && hour < 16) curCa = 2;
+    else curCa = 3;
+
+    document.getElementById("selectedDate").value = todayStr;
+    const container = document.getElementById("resultsContainer");
+    const found = SCHEDULE_DATA.find(item => item.ngay === todayStr && item.ca === curCa);
+
+    if (found) {
+      container.innerHTML = renderShiftCard(found, true);
+    } else {
+      container.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 20px 0;">Chưa có dữ liệu ca trực hiện tại (Ca ${curCa} ngày ${todayStr}). Vui lòng bấm "Cập nhật từ Google Sheets".</div>`;
+    }
+  }
+
+  (async function init() {
+    const todayStr = formatDateISO(new Date());
+    const dateInput = document.getElementById("selectedDate");
+    if (dateInput) dateInput.value = todayStr;
 
     const cached = localStorage.getItem('SCHEDULE_DATA_VHLD_GGSHEET');
     if (cached) {
-        try {
-            SCHEDULE_DATA = JSON.parse(cached);
-            updateStatusDisplay();
-            traCuuTheoNgay();
-        } catch(e) {}
+      try {
+        SCHEDULE_DATA = JSON.parse(cached);
+        updateStatusDisplay();
+        traCuuTheoNgay();
+      } catch(e) {}
     }
+
     await syncAllMonths();
-})();
+  })();
 </script>
-<!-- Bộ đếm người đang online -->
-<div style="text-align: center; margin: 20px 0; font-family: sans-serif; font-size: 14px; color: #555;">
-  <span>Đang truy cập: </span>
-  <script id="_wau123">
-    var _wau = _wau || []; 
-    _wau.push(["small", "lichtruc-vhld", "123"]);
-  </script>
-  <script async src="//widgets.amung.us/small.js"></script>
-</div>
+
 </body>
 </html>
